@@ -1,0 +1,68 @@
+<div class="projects-page">
+  <!-- Projects Section -->
+  <div class="projects-panel">
+    <h2 class="section-title">Projects</h2>
+    <div class="projects-list">
+      @if (projects.length === 0) {
+        <div class="empty-state-box">
+          <i class="fas fa-folder-open"></i>
+          <p>No projects available</p>
+          <small>Add a new project to get started</small>
+        </div>
+      } @else {
+        @for (project of projects; track project.id) {
+          <div class="project-card" [class.active]="selectedProject() === project.id" (click)="selectProject(project.id)">
+            <div class="project-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="project-info">
+              <h3 class="project-name">{{ project.name }}</h3>
+              <p class="project-url">{{ project.url }}</p>
+              <p class="project-scan">Last Scan: {{ project.lastScan }}</p>
+            </div>
+            <i class="fas fa-chevron-right arrow-icon"></i>
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Scan History Section -->
+  <div class="scan-history-panel">
+    <h2 class="section-title">Scan History</h2>
+    
+    <div class="history-card">
+      <h3 class="history-label">Scan History</h3>
+      <div class="table-wrapper">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Scan Date</th>
+              <th>Branch</th>
+              <th>Commit Hash</th>
+              <th>Gate Status</th>
+              <th>View Analysis</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (scan of scanHistory; track scan.commit) {
+              <tr>
+                <td>{{ scan.date }}</td>
+                <td>{{ scan.branch }}</td>
+                <td><code>{{ scan.commit }}</code></td>
+                <td>
+                  <span class="badge" [class.badge-success]="scan.status === 'PASS'" [class.badge-danger]="scan.status === 'FAIL'">
+                    {{ scan.status }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn-link">View Analysis</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

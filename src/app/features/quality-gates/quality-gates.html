@@ -1,0 +1,107 @@
+<div class="quality-gates-page">
+  <!-- Current Gate Status -->
+  <div class="gate-status-card" [class.fail]="gateStatus.status === 'FAIL'" [class.pass]="gateStatus.status === 'PASS'">
+    <div class="gate-header">
+      <div class="gate-icon">
+        @if (gateStatus.status === 'FAIL') {
+          <i class="fas fa-times-circle"></i>
+        }
+        @if (gateStatus.status === 'PASS') {
+          <i class="fas fa-check-circle"></i>
+        }
+      </div>
+      <div class="gate-info">
+        <h2 class="gate-title">QUALITY GATE: {{ gateStatus.status }}</h2>
+        <p class="gate-meta">Branch: {{ gateStatus.branch }} | Scan Date: {{ gateStatus.scanDate }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="gate-grid">
+    <!-- Gate Conditions List -->
+    <div class="gate-conditions-card">
+      <h2 class="section-title">Gate Conditions</h2>
+      <div class="conditions-list">
+        @for (condition of gateConditions; track condition.name) {
+          <div class="condition-item" [class.failed]="condition.status === 'FAILED'">
+            <div class="condition-icon">
+              @if (condition.status === 'FAILED') {
+                <i class="fas fa-times-circle"></i>
+              }
+              @if (condition.status === 'PASSED') {
+                <i class="fas fa-check-circle"></i>
+              }
+            </div>
+            <div class="condition-content">
+              <h3 class="condition-name">{{ condition.name }}</h3>
+              <p class="condition-description">{{ condition.description }}</p>
+            </div>
+            <div class="condition-status">
+              <span class="badge" 
+                [class.badge-danger]="condition.status === 'FAILED'"
+                [class.badge-success]="condition.status === 'PASSED'"
+                [class.badge-warning]="condition.status === 'WARN'">
+                {{ condition.status }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Gate Conditions (Duplicate section as shown in image) -->
+    <div class="gate-conditions-card">
+      <h2 class="section-title">Gate Conditions</h2>
+      <div class="simple-conditions-list">
+        @for (condition of gateConditions; track condition.name) {
+          <div class="simple-condition-row">
+            <div class="simple-condition-icon" [class.failed]="condition.status === 'FAILED'" [class.passed]="condition.status === 'PASSED'">
+              {{ condition.status === 'FAILED' ? '✕' : '✓' }}
+            </div>
+            <div class="simple-condition-text">
+              <div class="simple-condition-name">{{ condition.name }}</div>
+              <div class="simple-condition-desc">{{ condition.description }}</div>
+            </div>
+            <span class="badge" 
+              [class.badge-danger]="condition.status === 'FAILED'"
+              [class.badge-success]="condition.status === 'PASSED'"
+              [class.badge-warning]="condition.status === 'WARN'">
+              {{ condition.status }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Gate History -->
+  <div class="gate-history-card">
+    <h2 class="section-title">Gate History</h2>
+    <table class="gate-history-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Branch</th>
+          <th>Status</th>
+          <th>Failed Rule</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (history of gateHistory; track history.date) {
+          <tr>
+            <td>{{ history.date }}</td>
+            <td>{{ history.branch }}</td>
+            <td>
+              <span class="badge" 
+                [class.badge-success]="history.status === 'PASS'"
+                [class.badge-danger]="history.status === 'FAIL'">
+                {{ history.status }}
+              </span>
+            </td>
+            <td>{{ history.failedRule || 'All conditions passed' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

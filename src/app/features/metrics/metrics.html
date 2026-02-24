@@ -1,0 +1,76 @@
+<div class="metrics-page">
+  <!-- Metrics KPIs -->
+  <div class="metrics-kpi-grid">
+    @for (kpi of metricsKpi; track kpi.label) {
+      <div class="metric-kpi-card" [class]="'kpi-' + kpi.color">
+        <div class="kpi-icon" [innerHTML]="kpi.icon"></div>
+        <div class="kpi-value">{{ kpi.value }}</div>
+        <div class="kpi-label">{{ kpi.label }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <h2 class="section-title">Coverage Trend</h2>
+      <div class="chart-placeholder">
+        <svg width="100%" height="250" viewBox="0 0 600 250">
+          <polyline points="50,200 150,150 250,130 350,110 450,90 550,80" 
+            fill="none" stroke="#2563EB" stroke-width="3"/>
+          <circle cx="550" cy="80" r="5" fill="#2563EB"/>
+          <text x="560" y="85" fill="#2563EB" font-size="14" font-weight="600">72%</text>
+          <line x1="50" y1="220" x2="550" y2="220" stroke="#E2E8F0" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h2 class="section-title">Bugs vs Vulnerabilities</h2>
+      <div class="chart-placeholder">
+        <svg width="100%" height="250" viewBox="0 0 600 250">
+          <g>
+            <rect x="80" y="100" width="60" height="120" fill="#DC2626" opacity="0.8"/>
+            <rect x="160" y="120" width="60" height="100" fill="#DC2626" opacity="0.8"/>
+            <rect x="240" y="110" width="60" height="110" fill="#DC2626" opacity="0.8"/>
+            <rect x="320" y="100" width="60" height="120" fill="#DC2626" opacity="0.8"/>
+            <rect x="400" y="80" width="60" height="140" fill="#DC2626" opacity="0.8"/>
+            <rect x="480" y="90" width="60" height="130" fill="#DC2626" opacity="0.8"/>
+          </g>
+          <line x1="50" y1="220" x2="570" y2="220" stroke="#E2E8F0" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module Metrics Table -->
+  <div class="table-card">
+    <h2 class="section-title">Module Metrics</h2>
+    <table class="metrics-table">
+      <thead>
+        <tr>
+          <th>Module Name</th>
+          <th>Bugs</th>
+          <th>Code Smells</th>
+          <th>Coverage %</th>
+          <th>Duplication %</th>
+          <th>Complexity</th>
+          <th>Lines of Code</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (module of moduleMetrics; track module.name) {
+          <tr>
+            <td><strong>{{ module.name }}</strong></td>
+            <td>{{ module.bugs }}</td>
+            <td>{{ module.codeSmells }}</td>
+            <td>{{ module.coverage }}%</td>
+            <td>{{ module.duplication }}%</td>
+            <td>{{ module.complexity }}</td>
+            <td>{{ module.loc }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

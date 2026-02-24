@@ -1,0 +1,111 @@
+<div class="qa-analysis-page">
+  <div class="qa-grid">
+    <!-- Manual QA Entry Form -->
+    <div class="qa-form-card">
+      <h2 class="section-title">Manual QA Entry</h2>
+      <form class="qa-form" [formGroup]="qaForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Module *</label>
+          <select class="form-control" formControlName="module">
+            <option value="">Select module</option>
+            @for (module of moduleOptions; track module) {
+              <option [value]="module">{{ module }}</option>
+            }
+          </select>
+          @if (formSubmitted() && qaForm.get('module')?.invalid) {
+            <div class="error-message">{{ getErrorMessage('module') }}</div>
+          }
+        </div>
+        
+        <div class="form-group">
+          <label>Issue Type *</label>
+          <select class="form-control" formControlName="issueType">
+            <option value="">Select issue type</option>
+            @for (type of issueTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+          @if (formSubmitted() && qaForm.get('issueType')?.invalid) {
+            <div class="error-message">{{ getErrorMessage('issueType') }}</div>
+          }
+        </div>
+        
+        <div class="form-group">
+          <label>Severity *</label>
+          <select class="form-control" formControlName="severity">
+            <option value="">Select severity</option>
+            @for (severity of severityLevels; track severity) {
+              <option [value]="severity">{{ severity }}</option>
+            }
+          </select>
+          @if (formSubmitted() && qaForm.get('severity')?.invalid) {
+            <div class="error-message">{{ getErrorMessage('severity') }}</div>
+          }
+        </div>
+        
+        <div class="form-group">
+          <label>Description *</label>
+          <textarea class="form-control" rows="4" formControlName="description" placeholder="Enter issue description (minimum 10 characters)..."></textarea>
+          @if (formSubmitted() && qaForm.get('description')?.invalid) {
+            <div class="error-message">{{ getErrorMessage('description') }}</div>
+          }
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+
+    <!-- QA Summary and Comparison -->
+    <div class="qa-results">
+      <!-- QA Summary KPIs -->
+      <h2 class="section-title">QA Summary</h2>
+      <div class="qa-summary-grid">
+        @for (item of qaSummary; track item.label) {
+          <div class="qa-summary-card" [class]="item.color">
+            <div class="summary-icon">{{ item.icon }}</div>
+            <div class="summary-value">{{ item.value }}</div>
+            <div class="summary-label">{{ item.label }}</div>
+          </div>
+        }
+      </div>
+
+      <!-- Comparison Table -->
+      <h2 class="section-title mt-4">Comparison</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Issue</th>
+            <th>Manual Found</th>
+            <th>Automated Found</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (issue of comparisonData; track issue.name) {
+            <tr>
+              <td>{{ issue.name }}</td>
+              <td>
+                <span [class]="issue.manualFound ? 'check-icon' : 'cross-icon'">
+                  {{ issue.manualFound ? '✓' : '✕' }}
+                </span>
+              </td>
+              <td>
+                <span [class]="issue.automatedFound ? 'check-icon' : 'cross-icon'">
+                  {{ issue.automatedFound ? '✓' : '✕' }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" 
+                  [class.badge-success]="issue.result === 'Matched'"
+                  [class.badge-danger]="issue.result === 'Missed'"
+                  [class.badge-warning]="issue.result === 'False Positive'">
+                  {{ issue.result }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

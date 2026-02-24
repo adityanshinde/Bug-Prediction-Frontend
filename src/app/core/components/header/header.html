@@ -1,0 +1,38 @@
+<header class="header">
+  <div class="header-content">
+    <div class="header-left">
+      <svg width="28" height="28" viewBox="0 0 48 48" fill="none" class="header-logo">
+        <rect width="48" height="48" rx="8" fill="#2563EB"/>
+        <path d="M24 12L32 20L24 28L16 20L24 12Z" fill="white"/>
+        <path d="M24 20L28 24L24 28L20 24L24 20Z" fill="#93C5FD"/>
+      </svg>
+      <h1 class="header-title">Bug Prediction & Code Quality Dashboard</h1>
+    </div>
+    
+    <div class="header-center">
+      <span class="project-info">
+        <strong>Project:</strong> {{ projectName() }}
+      </span>
+      <span class="divider">|</span>
+      <span class="project-info">
+        <strong>Branch:</strong> {{ branch() }}
+      </span>
+      <span class="divider">|</span>
+      <span class="project-info">
+        <strong>Last Scan:</strong> {{ lastScan() }}
+      </span>
+    </div>
+    
+    <div class="header-right">
+      <button class="icon-btn refresh-btn" (click)="onRefresh()" title="Refresh data" aria-label="Refresh dashboard data">
+        <i class="fas fa-sync-alt" aria-hidden="true"></i>
+      </button>
+      <span class="badge" [class.badge-success]="qualityGateStatus() === 'PASS'" [class.badge-danger]="qualityGateStatus() === 'FAIL'" title="Current quality gate status">
+        {{ qualityGateStatus() }}
+      </span>
+      <button class="icon-btn" title="More options" aria-label="Show more options">
+        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>

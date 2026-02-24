@@ -1,0 +1,22 @@
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+      <rect width="48" height="48" rx="8" fill="white" opacity="0.15"/>
+      <path d="M24 14L30 20L24 26L18 20L24 14Z" fill="white"/>
+      <path d="M24 22L27 25L24 28L21 25L24 22Z" fill="#93C5FD"/>
+    </svg>
+  </div>
+  
+  <nav class="sidebar-nav">
+    @for (item of menuItems; track item.route) {
+      <a 
+        [routerLink]="item.route" 
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
+        class="nav-item">
+        <span class="nav-icon" [innerHTML]="item.icon"></span>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+</aside>

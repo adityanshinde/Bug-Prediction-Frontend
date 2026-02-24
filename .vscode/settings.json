@@ -1,0 +1,16 @@
+{
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "text": "Always follow AI_GUIDELINES.md before generating any code."
+    },
+    {
+      "text": "Analyze existing code before writing new code."
+    },
+    {
+      "text": "Reuse existing logic instead of duplicating."
+    },
+    {
+      "text": "Update STATUS.md for every change."
+    }
+  ]
+}

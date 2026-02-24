@@ -1,0 +1,141 @@
+.metrics-page {
+  padding: 24px 32px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.metrics-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.metric-kpi-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border-bottom: 4px solid;
+}
+
+.kpi-danger {
+  border-bottom-color: var(--danger-red);
+}
+
+.kpi-warning {
+  border-bottom-color: var(--warning-amber);
+}
+
+.kpi-success {
+  border-bottom-color: var(--success-green);
+}
+
+.metric-kpi-card .kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  font-size: 28px;
+}
+
+.kpi-danger .kpi-icon {
+  background: #FEE2E2;
+  color: var(--danger-red);
+}
+
+.kpi-warning .kpi-icon {
+  background: #FEF3C7;
+  color: var(--warning-amber);
+}
+
+.kpi-success .kpi-icon {
+  background: #DCFCE7;
+  color: var(--success-green);
+}
+
+.metric-kpi-card .kpi-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.metric-kpi-card .kpi-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.metric-kpi-card .kpi-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.chart-placeholder {
+  padding: 20px 0;
+}
+
+.table-card {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.metrics-table thead {
+  background: var(--hover-bg);
+}
+
+.metrics-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.metrics-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  border-top: 1px solid var(--border-color);
+}
+
+.metrics-table tbody tr:hover {
+  background: var(--hover-bg);
+}
+
+@media (max-width: 1200px) {
+  .metrics-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}

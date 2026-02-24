@@ -1,0 +1,205 @@
+.qa-analysis-page {
+  padding: 24px 32px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.qa-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 24px;
+}
+
+.qa-form-card {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.qa-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.form-control {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--info-blue);
+}
+
+textarea.form-control {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.error-message {
+  color: var(--danger-red);
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.form-control.ng-invalid.ng-touched {
+  border-color: var(--danger-red);
+}
+
+.qa-results {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.qa-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.qa-summary-card {
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  border-bottom: 4px solid;
+}
+
+.qa-summary-card.success {
+  background: #DCFCE7;
+  border-bottom-color: var(--success-green);
+}
+
+.qa-summary-card.danger {
+  background: #FEE2E2;
+  border-bottom-color: var(--danger-red);
+}
+
+.qa-summary-card.warning {
+  background: #FEF3C7;
+  border-bottom-color: var(--warning-amber);
+}
+
+.qa-summary-card.info {
+  background: #DBEAFE;
+  border-bottom-color: var(--info-blue);
+}
+
+.summary-icon {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.success .summary-icon {
+  color: var(--success-green);
+}
+
+.danger .summary-icon {
+  color: var(--danger-red);
+}
+
+.warning .summary-icon {
+  color: var(--warning-amber);
+}
+
+.info .summary-icon {
+  color: var(--info-blue);
+}
+
+.summary-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.mt-4 {
+  margin-top: 32px;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.comparison-table thead {
+  background: var(--hover-bg);
+}
+
+.comparison-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.comparison-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  border-top: 1px solid var(--border-color);
+}
+
+.comparison-table tbody tr:hover {
+  background: var(--hover-bg);
+}
+
+.check-icon {
+  color: var(--success-green);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.cross-icon {
+  color: var(--danger-red);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+@media (max-width: 1024px) {
+  .qa-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .qa-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
