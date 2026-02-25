@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-loader',
@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrl: './loader.css',
 })
 export class Loader {
-
+  message = input<string>('Loading...');
 }

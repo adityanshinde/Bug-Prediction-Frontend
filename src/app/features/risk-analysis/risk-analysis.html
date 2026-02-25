@@ -1,4 +1,17 @@
 <div class="risk-analysis-page">
+  @if (noProjectSelected()) {
+    <div class="no-project-banner">
+      <i class="fas fa-info-circle"></i>
+      Please select a project from the <strong>Projects</strong> page first.
+    </div>
+  }
+
+  @if (isLoading()) {
+    <app-loader message="Loading risk analysis..." />
+  } @else if (error()) {
+    <app-error-state [message]="error()!" (retry)="reload()" />
+  } @else if (data()) {
+
   <!-- Top Section: Overall Risk & Chart -->
   <div class="top-section">
     <!-- Overall Risk Card -->
@@ -10,13 +23,13 @@
             <i class="fas fa-exclamation-triangle"></i>
           </div>
           <div class="risk-value">
-            <span class="risk-number">{{ overallRisk.score }}</span>
-            <span class="risk-text">{{ overallRisk.level }}</span>
+            <span class="risk-number">{{ overallRisk().score }}</span>
+            <span class="risk-text">{{ overallRisk().level }}</span>
           </div>
         </div>
         <div class="risk-bottom">
           <div class="risk-label">Risk Score</div>
-          <div class="risk-status">{{ overallRisk.status }}</div>
+          <div class="risk-status">{{ overallRisk().status }}</div>
         </div>
       </div>
     </div>
@@ -32,22 +45,18 @@
           <text x="20" y="145" text-anchor="end" fill="#64748B" font-size="12">50</text>
           <text x="20" y="205" text-anchor="end" fill="#64748B" font-size="12">25</text>
           <text x="20" y="260" text-anchor="end" fill="#64748B" font-size="12">0</text>
-          
           <!-- Grid lines -->
           <line x1="35" y1="20" x2="680" y2="20" stroke="#E5E7EB" stroke-width="1"/>
           <line x1="35" y1="80" x2="680" y2="80" stroke="#E5E7EB" stroke-width="1"/>
           <line x1="35" y1="140" x2="680" y2="140" stroke="#E5E7EB" stroke-width="1"/>
           <line x1="35" y1="200" x2="680" y2="200" stroke="#E5E7EB" stroke-width="1"/>
           <line x1="35" y1="260" x2="680" y2="260" stroke="#E5E7EB" stroke-width="2"/>
-          
           <!-- Bars -->
           <g transform="translate(35, 0)">
-            @for (module of moduleRiskChart; track module.name; let i = $index) {
+            @for (module of moduleRiskChart(); track module.name; let i = $index) {
               <rect [attr.x]="40 + (i * 100)" [attr.y]="module.y" width="70" [attr.height]="module.height" fill="#DC2626" rx="2"/>
             }
-            
-            <!-- Module names below bars -->
-            @for (module of moduleRiskChart; track module.name; let i = $index) {
+            @for (module of moduleRiskChart(); track module.name; let i = $index) {
               <text [attr.x]="75 + (i * 100)" y="285" text-anchor="middle" fill="#1f2937" font-size="11" font-weight="500">{{ module.name }}</text>
             }
           </g>
@@ -73,7 +82,7 @@
           </tr>
         </thead>
         <tbody>
-          @if (highRiskModules.length === 0) {
+          @if (computedModules().length === 0) {
             <tr>
               <td colspan="7" class="empty-state">
                 <div class="empty-state-content">
@@ -84,17 +93,17 @@
               </td>
             </tr>
           } @else {
-            @for (module of highRiskModules; track module.name) {
+            @for (module of computedModules(); track module.moduleName) {
               <tr>
-                <td><strong>{{ module.name }}</strong></td>
+                <td><strong>{{ module.moduleName }}</strong></td>
                 <td>{{ module.bugs }}</td>
                 <td>{{ module.vulnerabilities }}</td>
                 <td>{{ module.coverage }}%</td>
                 <td>{{ module.duplication }}%</td>
                 <td><strong>{{ module.riskScore }}</strong></td>
                 <td>
-                  <span class="badge" 
-                    [class.badge-danger]="module.riskLevel === 'HIGH'" 
+                  <span class="badge"
+                    [class.badge-danger]="module.riskLevel === 'HIGH'"
                     [class.badge-warning]="module.riskLevel === 'MEDIUM'">
                     {{ module.riskLevel }}
                   </span>
@@ -106,4 +115,6 @@
       </table>
     </div>
   </div>
+
+  } <!-- end @else if (data()) -->
 </div>

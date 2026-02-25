@@ -1,100 +1,116 @@
 <div class="dashboard">
-  <!-- KPI Cards -->
-  <div class="kpi-grid">
-    @for (kpi of kpiData; track kpi.label) {
-      <app-kpi-card
-        [value]="kpi.value"
-        [label]="kpi.label"
-        [icon]="kpi.icon"
-        [color]="kpi.color"
-      />
-    }
-  </div>
+  @if (noProjectSelected()) {
+    <div class="no-project-banner">
+      <i class="fas fa-info-circle"></i>
+      Please select a project from the <strong>Projects</strong> page first.
+    </div>
+  }
 
-  <!-- Charts Section -->
-  <div class="charts-grid">
-    <!-- Issue Distribution -->
-    <div class="chart-panel">
-      <div class="chart-card">
-        <h2 class="chart-title">Issue Distribution</h2>
-        <div class="chart-content">
-          <svg width="200" height="200" viewBox="0 0 200 200" class="donut-chart">
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#fee2e2" stroke-width="40" />
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#dc2626" stroke-width="40" 
-                    stroke-dasharray="150 350" stroke-dashoffset="0" />
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#3b82f6" stroke-width="40"
-                    stroke-dasharray="100 400" stroke-dashoffset="-150" />
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#e5e7eb" stroke-width="40"
-                    stroke-dasharray="100 400" stroke-dashoffset="-250" />
-          </svg>
+  @if (isLoading()) {
+    <app-loader message="Loading dashboard..." />
+  } @else if (error()) {
+    <app-error-state [message]="error()!" (retry)="reload()" />
+  } @else if (data()) {
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      @for (kpi of kpiData(); track kpi.label) {
+        <app-kpi-card
+          [value]="kpi.value"
+          [label]="kpi.label"
+          [icon]="kpi.icon"
+          [color]="kpi.color"
+        />
+      }
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-grid">
+      <!-- Issue Distribution -->
+      <div class="chart-panel">
+        <div class="chart-card">
+          <h2 class="chart-title">Issue Distribution</h2>
+          <div class="chart-content">
+            <svg width="200" height="200" viewBox="0 0 200 200" class="donut-chart">
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#f3f4f6" stroke-width="40" />
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#dc2626" stroke-width="40"
+                      [attr.stroke-dasharray]="donutArcs().bugsLen + ' ' + donutArcs().circum"
+                      stroke-dashoffset="0" />
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#3b82f6" stroke-width="40"
+                      [attr.stroke-dasharray]="donutArcs().vulnsLen + ' ' + donutArcs().circum"
+                      [attr.stroke-dashoffset]="donutArcs().vulnsOffset" />
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#10b981" stroke-width="40"
+                      [attr.stroke-dasharray]="donutArcs().smellsLen + ' ' + donutArcs().circum"
+                      [attr.stroke-dashoffset]="donutArcs().smellsOffset" />
+            </svg>
+          </div>
+          <div class="chart-legend">
+            @for (item of chartLegend; track item.label) {
+              <div class="legend-item">
+                <span class="legend-dot" [style.background]="item.color"></span>
+                <span>{{ item.label }}</span>
+              </div>
+            }
+          </div>
         </div>
-        <div class="chart-legend">
-          @for (item of chartLegend; track item.label) {
-            <div class="legend-item">
-              <span class="legend-dot" [style.background]="item.color"></span>
-              <span>{{ item.label }}</span>
-            </div>
-          }
+      </div>
+
+      <!-- Overall Risk -->
+      <div class="chart-panel">
+        <div class="chart-card">
+          <h2 class="chart-title">Overall Risk</h2>
+          <div class="risk-content">
+            <div class="risk-badge">{{ overallRisk().level }}</div>
+            <p class="risk-description">{{ overallRisk().description }}</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Overall Risk -->
-    <div class="chart-panel">
-      <div class="chart-card">
-        <h2 class="chart-title">Overall Risk</h2>
-        <div class="risk-content">
-          <div class="risk-badge">{{ overallRisk.level }}</div>
-          <p class="risk-description">{{ overallRisk.description }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent Scans Table -->
-  <div class="table-card">
-    <h2 class="table-title">Recent Scans</h2>
-    <div class="table-wrapper">
-      <table class="scans-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Branch</th>
-            <th>Commit</th>
-            <th>Quality Gate</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (recentScans.length === 0) {
+    <!-- Recent Scans Table -->
+    <div class="table-card">
+      <h2 class="table-title">Recent Scans</h2>
+      <div class="table-wrapper">
+        <table class="scans-table">
+          <thead>
             <tr>
-              <td colspan="5" class="empty-state">
-                <div class="empty-state-content">
-                  <i class="fas fa-inbox"></i>
-                  <p>No recent scans available</p>
-                </div>
-              </td>
+              <th>Date</th>
+              <th>Branch</th>
+              <th>Commit</th>
+              <th>Quality Gate</th>
+              <th>Action</th>
             </tr>
-          } @else {
-            @for (scan of recentScans; track scan.commit) {
+          </thead>
+          <tbody>
+            @if (recentScans().length === 0) {
               <tr>
-                <td>{{ scan.date }}</td>
-                <td>{{ scan.branch }}</td>
-                <td><code>{{ scan.commit }}</code></td>
-                <td>
-                  <span class="badge" [class.badge-success]="scan.qualityGate === 'PASS'" 
-                                      [class.badge-danger]="scan.qualityGate === 'FAIL'">
-                    {{ scan.qualityGate }}
-                  </span>
-                </td>
-                <td>
-                  <button class="btn-link">View</button>
+                <td colspan="5" class="empty-state">
+                  <div class="empty-state-content">
+                    <i class="fas fa-inbox"></i>
+                    <p>No recent scans available</p>
+                  </div>
                 </td>
               </tr>
+            } @else {
+              @for (scan of recentScans(); track scan.commit) {
+                <tr>
+                  <td>{{ scan.date }}</td>
+                  <td>{{ scan.branch }}</td>
+                  <td><code>{{ scan.commit }}</code></td>
+                  <td>
+                    <span class="badge" [class.badge-success]="scan.qualityGate === 'PASS'"
+                                        [class.badge-danger]="scan.qualityGate === 'FAIL'">
+                      {{ scan.qualityGate }}
+                    </span>
+                  </td>
+                  <td><button class="btn-link">View</button></td>
+                </tr>
+              }
             }
-          }
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
+
+  } <!-- end @else if (data()) -->
 </div>

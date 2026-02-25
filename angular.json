@@ -67,7 +67,8 @@
               "buildTarget": "BPCQF:build:production"
             },
             "development": {
-              "buildTarget": "BPCQF:build:development"
+              "buildTarget": "BPCQF:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

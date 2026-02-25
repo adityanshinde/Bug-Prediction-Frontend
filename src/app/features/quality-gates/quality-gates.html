@@ -1,18 +1,31 @@
 <div class="quality-gates-page">
+  @if (noProjectSelected()) {
+    <div class="no-project-banner">
+      <i class="fas fa-info-circle"></i>
+      Please select a project from the <strong>Projects</strong> page first.
+    </div>
+  }
+
+  @if (isLoading()) {
+    <app-loader message="Loading quality gates..." />
+  } @else if (error()) {
+    <app-error-state [message]="error()!" (retry)="reload()" />
+  } @else if (data()) {
+
   <!-- Current Gate Status -->
-  <div class="gate-status-card" [class.fail]="gateStatus.status === 'FAIL'" [class.pass]="gateStatus.status === 'PASS'">
+  <div class="gate-status-card" [class.fail]="gateStatus().status === 'FAIL'" [class.pass]="gateStatus().status === 'PASS'">
     <div class="gate-header">
       <div class="gate-icon">
-        @if (gateStatus.status === 'FAIL') {
+        @if (gateStatus().status === 'FAIL') {
           <i class="fas fa-times-circle"></i>
         }
-        @if (gateStatus.status === 'PASS') {
+        @if (gateStatus().status === 'PASS') {
           <i class="fas fa-check-circle"></i>
         }
       </div>
       <div class="gate-info">
-        <h2 class="gate-title">QUALITY GATE: {{ gateStatus.status }}</h2>
-        <p class="gate-meta">Branch: {{ gateStatus.branch }} | Scan Date: {{ gateStatus.scanDate }}</p>
+        <h2 class="gate-title">QUALITY GATE: {{ gateStatus().status }}</h2>
+        <p class="gate-meta">Branch: {{ gateStatus().branch }} | Scan Date: {{ gateStatus().scanDate }}</p>
       </div>
     </div>
   </div>
@@ -22,7 +35,7 @@
     <div class="gate-conditions-card">
       <h2 class="section-title">Gate Conditions</h2>
       <div class="conditions-list">
-        @for (condition of gateConditions; track condition.name) {
+        @for (condition of gateConditions(); track condition.name) {
           <div class="condition-item" [class.failed]="condition.status === 'FAILED'">
             <div class="condition-icon">
               @if (condition.status === 'FAILED') {
@@ -53,7 +66,7 @@
     <div class="gate-conditions-card">
       <h2 class="section-title">Gate Conditions</h2>
       <div class="simple-conditions-list">
-        @for (condition of gateConditions; track condition.name) {
+        @for (condition of gateConditions(); track condition.name) {
           <div class="simple-condition-row">
             <div class="simple-condition-icon" [class.failed]="condition.status === 'FAILED'" [class.passed]="condition.status === 'PASSED'">
               {{ condition.status === 'FAILED' ? '✕' : '✓' }}
@@ -87,7 +100,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (history of gateHistory; track history.date) {
+        @for (history of gateHistory(); track history.date) {
           <tr>
             <td>{{ history.date }}</td>
             <td>{{ history.branch }}</td>
@@ -104,4 +117,6 @@
       </tbody>
     </table>
   </div>
+
+  } <!-- end @else if (data()) -->
 </div>

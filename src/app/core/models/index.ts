@@ -5,3 +5,4 @@ export * from './risk.model';
 export * from './metrics.model';
 export * from './quality-gate.model';
 export * from './qa.model';
+export * from './api.models';

@@ -11,15 +11,15 @@
     
     <div class="header-center">
       <span class="project-info">
-        <strong>Project:</strong> {{ projectName() }}
+        <strong>Project:</strong> {{ headerData()?.projectName ?? (isLoading() ? '\u2026' : 'No project selected') }}
       </span>
       <span class="divider">|</span>
       <span class="project-info">
-        <strong>Branch:</strong> {{ branch() }}
+        <strong>Branch:</strong> {{ headerData()?.branch ?? '\u2014' }}
       </span>
       <span class="divider">|</span>
       <span class="project-info">
-        <strong>Last Scan:</strong> {{ lastScan() }}
+        <strong>Last Scan:</strong> {{ headerData()?.lastScanDate ?? '\u2014' }}
       </span>
     </div>
     
@@ -27,9 +27,14 @@
       <button class="icon-btn refresh-btn" (click)="onRefresh()" title="Refresh data" aria-label="Refresh dashboard data">
         <i class="fas fa-sync-alt" aria-hidden="true"></i>
       </button>
-      <span class="badge" [class.badge-success]="qualityGateStatus() === 'PASS'" [class.badge-danger]="qualityGateStatus() === 'FAIL'" title="Current quality gate status">
-        {{ qualityGateStatus() }}
-      </span>
+      @if (headerData()) {
+        <span class="badge"
+          [class.badge-success]="headerData()!.qualityGateStatus === 'PASS'"
+          [class.badge-danger]="headerData()!.qualityGateStatus === 'FAIL'"
+          title="Current quality gate status">
+          {{ headerData()!.qualityGateStatus }}
+        </span>
+      }
       <button class="icon-btn" title="More options" aria-label="Show more options">
         <i class="fas fa-chevron-down" aria-hidden="true"></i>
       </button>

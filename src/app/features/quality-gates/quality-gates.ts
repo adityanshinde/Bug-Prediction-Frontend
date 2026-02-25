@@ -1,32 +1,76 @@
-import { Component, signal } from '@angular/core';
-import { QualityGateStatus, GateCondition, GateHistory } from '../../core/models';
+import { Component, signal, inject, effect, computed } from '@angular/core';
+import { Loader } from '../../shared/components/loader/loader';
+import { ErrorState } from '../../shared/components/error-state/error-state';
+import { ProjectService } from '../../core/services/project';
+import { QualityGateService } from '../../core/services/quality-gate';
+import { QualityGateDto } from '../../core/models/api.models';
+import { QualityGateStatus, GateCondition, GateHistory, GateStatus } from '../../core/models';
 
 @Component({
   selector: 'app-quality-gates',
-  imports: [],
+  imports: [Loader, ErrorState],
   templateUrl: './quality-gates.html',
   styleUrl: './quality-gates.css',
 })
 export class QualityGates {
+  private projectService    = inject(ProjectService);
+  private qualityGateService = inject(QualityGateService);
+
   isLoading = signal(false);
-  error = signal<string | null>(null);
-  
-  gateStatus: QualityGateStatus = {
-    status: 'FAIL',
-    branch: 'dev',
-    scanDate: '30 Jan 2026'
-  };
+  error     = signal<string | null>(null);
+  data      = signal<QualityGateDto | null>(null);
 
-  gateConditions: GateCondition[] = [
-    { name: 'New or High Risk Bugs < 5', description: 'Detected 8 new or high risk bugs.', status: 'FAILED' },
-    { name: 'Code Coverage > 80%', description: 'Current coverage is 73%.', status: 'WARN' },
-    { name: 'Duplication < 15%', description: 'Current duplication is 12%.', status: 'PASSED' },
-    { name: 'Critical Vulnerabilities = 0', description: '0 critical vulnerabilities detected.', status: 'PASSED' }
-  ];
+  noProjectSelected = computed(() => this.projectService.selectedProjectId() === null);
 
-  gateHistory: GateHistory[] = [
-    { date: '30 Jan 2026', branch: 'dev', status: 'FAIL', failedRule: 'New or High Risk Bugs < 5' },
-    { date: '28 Jan 2026', branch: 'main', status: 'PASS', failedRule: null },
-    { date: '26 Jan 2026', branch: 'main', status: 'PASS', failedRule: null }
-  ];
+  gateStatus = computed<QualityGateStatus>(() => {
+    const d = this.data();
+    if (!d) return { status: 'FAIL' as GateStatus, branch: 'N/A', scanDate: 'N/A' };
+    const latest = d.history[0];
+    return {
+      status:   d.currentStatus as GateStatus,
+      branch:   latest?.branch ?? 'N/A',
+      scanDate: latest?.date ? new Date(latest.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'
+    };
+  });
+
+  gateConditions = computed<GateCondition[]>(() =>
+    (this.data()?.gateConditions ?? []).map(c => ({
+      name:        c.metric,
+      description: c.condition ?? (c.actualValue ? `Actual: ${c.actualValue}` : 'No threshold data'),
+      status:      c.status === 'PASS' ? 'PASSED' : 'FAILED'
+    } as GateCondition))
+  );
+
+  gateHistory = computed<GateHistory[]>(() =>
+    (this.data()?.history ?? []).map(h => ({
+      date:       h.date ? new Date(h.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A',
+      branch:     h.branch ?? 'N/A',
+      status:     (h.status ?? 'FAIL') as GateStatus,
+      failedRule: h.status === 'FAIL' ? 'One or more conditions failed' : null
+    } as GateHistory))
+  );
+
+  constructor() {
+    effect(() => {
+      const id = this.projectService.selectedProjectId();
+      if (id !== null) this.loadQualityGates(id);
+    });
+  }
+
+  loadQualityGates(projectId: number): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+    this.qualityGateService.getQualityGates(projectId).subscribe({
+      next: (d) => { this.data.set(d); this.isLoading.set(false); },
+      error: (err) => {
+        this.error.set(err.status === 404 ? 'No quality gate data found for this project.' : 'Failed to load quality gates.');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  reload(): void {
+    const id = this.projectService.selectedProjectId();
+    if (id !== null) this.loadQualityGates(id);
+  }
 }

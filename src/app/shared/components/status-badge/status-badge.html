@@ -1,1 +1,5 @@
-<p>status-badge works!</p>
+<span class="badge"
+  [class.badge-success]="status() === 'PASS' || status() === 'LOW'"
+  [class.badge-danger]="status() === 'FAIL' || status() === 'HIGH'"
+  [class.badge-warning]="status() === 'MEDIUM'"
+>{{ status() }}</span>

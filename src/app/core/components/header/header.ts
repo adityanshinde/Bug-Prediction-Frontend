@@ -1,4 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, effect } from '@angular/core';
+import { ProjectService } from '../../services/project';
+import { HeaderDto } from '../../models/api.models';
 
 @Component({
   selector: 'app-header',
@@ -7,13 +9,32 @@ import { Component, signal } from '@angular/core';
   styleUrl: './header.css',
 })
 export class Header {
-  projectName = signal('SchoolManagementAPI');
-  branch = signal('main');
-  lastScan = signal('02 Feb 2026 14:30');
-  qualityGateStatus = signal('PASS');
+  private projectService = inject(ProjectService);
 
-  onRefresh() {
-    // Refresh logic
-    console.log('Refreshing data...');
+  headerData = signal<HeaderDto | null>(null);
+  isLoading = signal(false);
+
+  constructor() {
+    effect(() => {
+      const id = this.projectService.selectedProjectId();
+      if (id !== null) {
+        this.loadHeader(id);
+      } else {
+        this.headerData.set(null);
+      }
+    });
+  }
+
+  loadHeader(id: number): void {
+    this.isLoading.set(true);
+    this.projectService.getHeader(id).subscribe({
+      next: (d) => { this.headerData.set(d); this.isLoading.set(false); },
+      error: ()  => { this.isLoading.set(false); }
+    });
+  }
+
+  onRefresh(): void {
+    const id = this.projectService.selectedProjectId();
+    if (id !== null) this.loadHeader(id);
   }
 }

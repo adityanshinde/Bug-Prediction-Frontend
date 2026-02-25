@@ -1,30 +1,90 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, effect, computed } from '@angular/core';
+import { Loader } from '../../shared/components/loader/loader';
+import { ErrorState } from '../../shared/components/error-state/error-state';
+import { ProjectService } from '../../core/services/project';
+import { MetricsService } from '../../core/services/metrics';
+import { MetricsDto } from '../../core/models/api.models';
 import { MetricsKpi, ModuleMetrics } from '../../core/models';
 
 @Component({
   selector: 'app-metrics',
-  imports: [],
+  imports: [Loader, ErrorState],
   templateUrl: './metrics.html',
   styleUrl: './metrics.css',
 })
 export class Metrics {
+  private projectService = inject(ProjectService);
+  private metricsService = inject(MetricsService);
+
   isLoading = signal(false);
   error = signal<string | null>(null);
-  
-  metricsKpi: MetricsKpi[] = [
-    { value: '34', label: 'Bugs', icon: '<i class="fas fa-bug"></i>', color: 'danger' },
-    { value: '21', label: 'Code Smells', icon: '<i class="fas fa-code"></i>', color: 'warning' },
-    { value: '72%', label: 'Coverage %', icon: '<i class="fas fa-chart-line"></i>', color: 'success' },
-    { value: '15%', label: 'Duplication %', icon: '<i class="fas fa-copy"></i>', color: 'warning' }
-  ];
+  data = signal<MetricsDto | null>(null);
 
-  moduleMetrics: ModuleMetrics[] = [
-    { name: 'UserAuth.js', bugs: 15, codeSmells: 7, coverage: 63, duplication: 32, complexity: 14, loc: 342 },
-    { name: 'PaymentProcessing.js', bugs: 9, codeSmells: 6, coverage: 75, duplication: 28, complexity: 10, loc: 290 },
-    { name: 'Notifications.js', bugs: 4, codeSmells: 2, coverage: 81, duplication: 19, complexity: 5, loc: 154 },
-    { name: 'DatabaseUtils.js', bugs: 5, codeSmells: 3, coverage: 78, duplication: 22, complexity: 7, loc: 188 },
-    { name: 'OrderManagement.js', bugs: 7, codeSmells: 5, coverage: 71, duplication: 25, complexity: 9, loc: 210 },
-    { name: 'Emailservice.js', bugs: 3, codeSmells: 2, coverage: 70, duplication: 24, complexity: 4, loc: 205 },
-    { name: 'Reporting.js', bugs: 2, codeSmells: 1, coverage: 84, duplication: 12, complexity: 3, loc: 120 }
-  ];
+  noProjectSelected = computed(() => this.projectService.selectedProjectId() === null);
+
+  metricsKpi = computed<MetricsKpi[]>(() => {
+    const d = this.data();
+    if (!d) return [];
+    return [
+      { value: d.kpis.bugs.toString(),                   label: 'Bugs',          icon: '<i class="fas fa-bug"></i>',        color: 'danger'  },
+      { value: d.kpis.codeSmells.toString(),             label: 'Code Smells',   icon: '<i class="fas fa-code"></i>',       color: 'warning' },
+      { value: `${d.kpis.coverage.toFixed(1)}%`,         label: 'Coverage %',   icon: '<i class="fas fa-chart-line"></i>', color: d.kpis.coverage >= 70 ? 'success' : 'warning' },
+      { value: `${d.kpis.duplication.toFixed(1)}%`,      label: 'Duplication %', icon: '<i class="fas fa-copy"></i>',       color: d.kpis.duplication <= 15 ? 'success' : 'warning' }
+    ] as MetricsKpi[];
+  });
+
+  moduleMetrics = computed<ModuleMetrics[]>(() =>
+    (this.data()?.moduleMetrics ?? []).map(m => ({
+      name:        m.moduleName,
+      bugs:        m.bugs,
+      codeSmells:  m.codeSmells,
+      coverage:    m.coverage,
+      duplication: m.duplication,
+      complexity:  m.complexity,
+      loc:         m.linesOfCode
+    }))
+  );
+
+  /** SVG polyline points for coverage trend (viewBox 0 0 600 250) */
+  coverageTrendPoints = computed<string>(() => {
+    const trend = this.data()?.coverageTrend ?? [];
+    if (trend.length === 0) return '';
+    const maxIdx = trend.length - 1;
+    return trend.map((p, i) => {
+      const x = maxIdx > 0 ? 50 + (i / maxIdx) * 500 : 300;
+      const y = 220 - (p.coverage / 100) * 190;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+  });
+
+  /** Latest coverage value label for end of trend line */
+  latestCoverage = computed<string>(() => {
+    const trend = this.data()?.coverageTrend ?? [];
+    if (trend.length === 0) return '—';
+    return `${trend[trend.length - 1].coverage.toFixed(1)}%`;
+  });
+
+  constructor() {
+    effect(() => {
+      const id = this.projectService.selectedProjectId();
+      if (id !== null) this.loadMetrics(id);
+    });
+  }
+
+  loadMetrics(projectId: number): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+    this.metricsService.getMetrics(projectId).subscribe({
+      next: (d) => { this.data.set(d); this.isLoading.set(false); },
+      error: (err) => {
+        this.error.set(err.status === 404 ? 'No metrics data found for this project.' : 'Failed to load metrics data.');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  reload(): void {
+    const id = this.projectService.selectedProjectId();
+    if (id !== null) this.loadMetrics(id);
+  }
 }

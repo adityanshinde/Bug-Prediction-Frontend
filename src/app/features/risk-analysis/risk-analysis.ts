@@ -1,39 +1,82 @@
-import { Component, signal } from '@angular/core';
-import { OverallRisk, HighRiskModule, ModuleRiskChartData } from '../../core/models';
+import { Component, signal, inject, effect, computed } from '@angular/core';
+import { Loader } from '../../shared/components/loader/loader';
+import { ErrorState } from '../../shared/components/error-state/error-state';
+import { ProjectService } from '../../core/services/project';
+import { RiskService } from '../../core/services/risk';
+import { RiskAnalysisDto, ComputedModuleRisk, calcRiskScore, calcRiskLevel } from '../../core/models/api.models';
+import { OverallRisk, ModuleRiskChartData } from '../../core/models';
 
 @Component({
   selector: 'app-risk-analysis',
-  imports: [],
+  imports: [Loader, ErrorState],
   templateUrl: './risk-analysis.html',
   styleUrl: './risk-analysis.css',
 })
 export class RiskAnalysis {
+  private projectService = inject(ProjectService);
+  private riskService    = inject(RiskService);
+
   isLoading = signal(false);
-  error = signal<string | null>(null);
-  
-  overallRisk: OverallRisk = {
-    score: 72,
-    level: 'HIGH RISK',
-    status: 'HIGH'
-  };
+  error     = signal<string | null>(null);
+  data      = signal<RiskAnalysisDto | null>(null);
 
-  moduleRiskChart: ModuleRiskChartData[] = [
-    { name: 'Auth', value: 20, y: 220, height: 40 },
-    { name: 'Email', value: 30, y: 200, height: 60 },
-    { name: 'DB', value: 45, y: 170, height: 90 },
-    { name: 'API', value: 60, y: 140, height: 120 },
-    { name: 'Session', value: 80, y: 100, height: 160 },
-    { name: 'Payment', value: 100, y: 40, height: 220 }
-  ];
+  noProjectSelected = computed(() => this.projectService.selectedProjectId() === null);
 
-  highRiskModules: HighRiskModule[] = [
-    { name: 'UserAuth.js', bugs: 15, vulnerabilities: 2, coverage: 65, duplication: 32, riskScore: 92, riskLevel: 'HIGH' },
-    { name: 'PaymentProcessing.js', bugs: 9, vulnerabilities: 2, coverage: 73, duplication: 28, riskScore: 86, riskLevel: 'HIGH' },
-    { name: 'EmailService.js', bugs: 7, vulnerabilities: 1, coverage: 70, duplication: 24, riskScore: 77, riskLevel: 'MEDIUM' },
-    { name: 'DatabaseHandler.js', bugs: 12, vulnerabilities: 3, coverage: 58, duplication: 38, riskScore: 89, riskLevel: 'HIGH' },
-    { name: 'APIGateway.js', bugs: 6, vulnerabilities: 1, coverage: 75, duplication: 22, riskScore: 71, riskLevel: 'MEDIUM' },
-    { name: 'SessionManager.js', bugs: 10, vulnerabilities: 2, coverage: 62, duplication: 30, riskScore: 83, riskLevel: 'HIGH' },
-    { name: 'FileUploader.js', bugs: 8, vulnerabilities: 1, coverage: 68, duplication: 26, riskScore: 75, riskLevel: 'MEDIUM' },
-    { name: 'NotificationService.js', bugs: 5, vulnerabilities: 0, coverage: 78, duplication: 20, riskScore: 68, riskLevel: 'MEDIUM' }
-  ];
+  /** High-risk modules with computed riskScore + riskLevel, sorted by score desc */
+  computedModules = computed<ComputedModuleRisk[]>(() =>
+    (this.data()?.highRiskModules ?? []).map(m => {
+      const score = calcRiskScore(m.bugs, m.vulnerabilities, m.coverage, m.duplication);
+      return { ...m, riskScore: Math.round(score), riskLevel: calcRiskLevel(score) };
+    }).sort((a, b) => b.riskScore - a.riskScore)
+  );
+
+  /** Overall risk aggregated from all computed modules */
+  overallRisk = computed<OverallRisk>(() => {
+    const mods = this.computedModules();
+    if (mods.length === 0) return { score: 0, level: 'LOW RISK', status: 'LOW' };
+    const avg = mods.reduce((s, m) => s + m.riskScore, 0) / mods.length;
+    const lvl = calcRiskLevel(avg);
+    return { score: Math.round(avg), level: `${lvl} RISK`, status: lvl };
+  });
+
+  /** Bar chart data from moduleDistribution — top 6 modules by risk score */
+  moduleRiskChart = computed<ModuleRiskChartData[]>(() => {
+    const scored = (this.data()?.moduleDistribution ?? [])
+      .map(m => ({
+        name:  m.moduleName.split('/').pop() ?? m.moduleName,
+        score: calcRiskScore(m.bugs, m.vulnerabilities, m.coverage, m.duplication)
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6);
+
+    const maxScore = scored.reduce((m, v) => Math.max(m, v.score), 1);
+    return scored.map(m => {
+      const height = Math.max(4, (m.score / maxScore) * 240);
+      return { name: m.name, value: Math.round(m.score), y: 260 - height, height };
+    });
+  });
+
+  constructor() {
+    effect(() => {
+      const id = this.projectService.selectedProjectId();
+      if (id !== null) this.loadRiskAnalysis(id);
+    });
+  }
+
+  loadRiskAnalysis(projectId: number): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+    this.riskService.getRiskAnalysis(projectId).subscribe({
+      next: (d) => { this.data.set(d); this.isLoading.set(false); },
+      error: (err) => {
+        this.error.set(err.status === 404 ? 'No risk data found for this project.' : 'Failed to load risk analysis.');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  reload(): void {
+    const id = this.projectService.selectedProjectId();
+    if (id !== null) this.loadRiskAnalysis(id);
+  }
 }

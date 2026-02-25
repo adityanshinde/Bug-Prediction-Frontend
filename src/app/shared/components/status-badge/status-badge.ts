@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 
+/** Renders a PASS/FAIL badge. Also supports HIGH | MEDIUM | LOW risk levels. */
 @Component({
   selector: 'app-status-badge',
   imports: [],
@@ -7,5 +8,5 @@ import { Component } from '@angular/core';
   styleUrl: './status-badge.css',
 })
 export class StatusBadge {
-
+  status = input.required<string>();
 }
