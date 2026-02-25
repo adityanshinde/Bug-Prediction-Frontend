@@ -160,6 +160,39 @@ export interface ScanHistoryDto {
 }
 
 
+// ── /api/projects/{id}/qa-entries (GET) ──────────────────────
+export interface QASummaryDto {
+  totalEntries: number;
+  bugEntries: number;
+  vulnerabilityEntries: number;
+  codeSmellEntries: number;
+  criticalCount: number;
+  highCount: number;
+  mediumCount: number;
+  lowCount: number;
+  entries: QAEntryResponseDto[];
+}
+
+export interface QAEntryResponseDto {
+  id: number;
+  projectId: number;
+  moduleName: string;
+  issueType: string;    // "Bug" | "Vulnerability" | "Code Smell"
+  severity: string;     // "Critical" | "High" | "Medium" | "Low"
+  description: string | null;
+  reportedBy: string | null;
+  entryDate: string;    // ISO datetime
+}
+
+// ── /api/projects/{id}/qa-entries (POST body) ─────────────────
+export interface QAEntryRequestDto {
+  moduleName: string;
+  issueType: string;
+  severity: string;
+  description?: string;
+  reportedBy?: string;
+}
+
 // ── Computed / frontend-only types ────────────────────────────
 export interface ComputedModuleRisk extends HighRiskModuleDto {
   riskScore: number;

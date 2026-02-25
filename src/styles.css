@@ -309,3 +309,35 @@ code {
 .no-project-banner i {
   font-size: 16px;
 }
+
+/* ── QA Analysis ───────────────────────────────────────────── */
+.success-banner {
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.empty-entries {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+}
+
+.empty-entries i {
+  font-size: 36px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.empty-entries p {
+  font-size: 14px;
+  margin: 0;
+}

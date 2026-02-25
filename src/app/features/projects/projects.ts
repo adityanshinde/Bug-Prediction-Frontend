@@ -11,7 +11,7 @@ import { ProjectListDto, ScanHistoryDto } from '../../core/models/api.models';
   styleUrl: './projects.css',
 })
 export class Projects implements OnInit {
-  private projectService = inject(ProjectService);
+  protected projectService = inject(ProjectService);
 
   isLoading     = signal(false);
   error         = signal<string | null>(null);

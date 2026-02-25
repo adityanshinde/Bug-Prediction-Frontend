@@ -14,7 +14,7 @@ import { KpiData, OverallRiskData, ChartLegendItem, RecentScan } from '../../cor
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
-  private projectService = inject(ProjectService);
+  protected projectService = inject(ProjectService);
   private dashboardService = inject(DashboardService);
 
   isLoading = signal(false);

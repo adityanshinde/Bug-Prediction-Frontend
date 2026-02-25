@@ -13,7 +13,7 @@ import { QualityGateStatus, GateCondition, GateHistory, GateStatus } from '../..
   styleUrl: './quality-gates.css',
 })
 export class QualityGates {
-  private projectService    = inject(ProjectService);
+  protected projectService    = inject(ProjectService);
   private qualityGateService = inject(QualityGateService);
 
   isLoading = signal(false);

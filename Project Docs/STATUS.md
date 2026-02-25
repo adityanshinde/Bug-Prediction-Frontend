@@ -179,6 +179,22 @@
 - ✅ **QA Analysis** — no backend endpoint exists yet; remains with mock data and local form validation
 - ✅ **Build verification** — `ng build --configuration=development` passes with 0 errors, 0 warnings
 
+### **Phase 12: QA Analysis Full API Wiring + Fixes** (Feb 25, 2026)
+- ✅ Fixed `private projectService` → `protected` in all 6 components (Angular `strictTemplates` requires protected for members used in template-derived computed signals)
+- ✅ Added `QASummaryDto`, `QAEntryResponseDto`, `QAEntryRequestDto` to `api.models.ts`
+- ✅ Implemented `QaService` with `getQAEntries()` and `submitQAEntry()`
+- ✅ QA Analysis component fully rewritten:
+  - Module dropdown loaded from `MetricsService` (real modules from project, not hardcoded)
+  - `effect()` reacts to `selectedProjectId` → loads QA entries + module list
+  - QA Summary cards driven by `GET /api/projects/{id}/qa-entries` response (total/bug/vuln/code smell counts)
+  - Form submit calls `POST /api/projects/{id}/qa-entries`, then auto-refreshes entries
+  - Added `reportedBy` field to form
+  - Entries table replaced old comparison table (shows Module, Type, Severity, Description, Reported By, Date)
+  - Success banner shows after successful submit
+  - No-project banner for unselected state
+- ✅ Added `.success-banner` and `.empty-entries` CSS to `styles.css`
+- ✅ `ng build` → 0 errors, 0 warnings
+
 ---
 
 ## 🎯 Current Status

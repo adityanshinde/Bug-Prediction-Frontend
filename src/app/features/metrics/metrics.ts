@@ -13,7 +13,7 @@ import { MetricsKpi, ModuleMetrics } from '../../core/models';
   styleUrl: './metrics.css',
 })
 export class Metrics {
-  private projectService = inject(ProjectService);
+  protected projectService = inject(ProjectService);
   private metricsService = inject(MetricsService);
 
   isLoading = signal(false);

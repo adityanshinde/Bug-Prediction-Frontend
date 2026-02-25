@@ -1,22 +1,40 @@
 <div class="qa-analysis-page">
+
+  @if (noProjectSelected()) {
+    <div class="no-project-banner">
+      <i class="fas fa-info-circle"></i>
+      Please select a project from the <strong>Projects</strong> page first.
+    </div>
+  }
+
   <div class="qa-grid">
     <!-- Manual QA Entry Form -->
     <div class="qa-form-card">
       <h2 class="section-title">Manual QA Entry</h2>
+
+      @if (submitSuccess()) {
+        <div class="success-banner">
+          <i class="fas fa-check-circle"></i> Entry submitted successfully!
+        </div>
+      }
+
       <form class="qa-form" [formGroup]="qaForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label>Module *</label>
           <select class="form-control" formControlName="module">
             <option value="">Select module</option>
-            @for (module of moduleOptions; track module) {
-              <option [value]="module">{{ module }}</option>
+            @if (moduleOptions().length === 0) {
+              <option disabled>Select a project first to load modules</option>
+            }
+            @for (mod of moduleOptions(); track mod) {
+              <option [value]="mod">{{ mod }}</option>
             }
           </select>
           @if (formSubmitted() && qaForm.get('module')?.invalid) {
             <div class="error-message">{{ getErrorMessage('module') }}</div>
           }
         </div>
-        
+
         <div class="form-group">
           <label>Issue Type *</label>
           <select class="form-control" formControlName="issueType">
@@ -29,7 +47,7 @@
             <div class="error-message">{{ getErrorMessage('issueType') }}</div>
           }
         </div>
-        
+
         <div class="form-group">
           <label>Severity *</label>
           <select class="form-control" formControlName="severity">
@@ -42,70 +60,95 @@
             <div class="error-message">{{ getErrorMessage('severity') }}</div>
           }
         </div>
-        
+
         <div class="form-group">
-          <label>Description *</label>
-          <textarea class="form-control" rows="4" formControlName="description" placeholder="Enter issue description (minimum 10 characters)..."></textarea>
+          <label>Description</label>
+          <textarea class="form-control" rows="4" formControlName="description"
+            placeholder="Enter issue description (optional, minimum 10 characters if provided)..."></textarea>
           @if (formSubmitted() && qaForm.get('description')?.invalid) {
             <div class="error-message">{{ getErrorMessage('description') }}</div>
           }
         </div>
-        
-        <button type="submit" class="btn btn-primary">Submit</button>
+
+        <div class="form-group">
+          <label>Reported By</label>
+          <input type="text" class="form-control" formControlName="reportedBy" placeholder="Your name (optional)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+          @if (isSubmitting()) { Submitting... } @else { Submit Entry }
+        </button>
       </form>
     </div>
 
-    <!-- QA Summary and Comparison -->
+    <!-- QA Summary and Entries -->
     <div class="qa-results">
       <!-- QA Summary KPIs -->
       <h2 class="section-title">QA Summary</h2>
-      <div class="qa-summary-grid">
-        @for (item of qaSummary; track item.label) {
-          <div class="qa-summary-card" [class]="item.color">
-            <div class="summary-icon">{{ item.icon }}</div>
-            <div class="summary-value">{{ item.value }}</div>
-            <div class="summary-label">{{ item.label }}</div>
-          </div>
-        }
-      </div>
 
-      <!-- Comparison Table -->
-      <h2 class="section-title mt-4">Comparison</h2>
-      <table class="comparison-table">
-        <thead>
-          <tr>
-            <th>Issue</th>
-            <th>Manual Found</th>
-            <th>Automated Found</th>
-            <th>Result</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (issue of comparisonData; track issue.name) {
-            <tr>
-              <td>{{ issue.name }}</td>
-              <td>
-                <span [class]="issue.manualFound ? 'check-icon' : 'cross-icon'">
-                  {{ issue.manualFound ? '✓' : '✕' }}
-                </span>
-              </td>
-              <td>
-                <span [class]="issue.automatedFound ? 'check-icon' : 'cross-icon'">
-                  {{ issue.automatedFound ? '✓' : '✕' }}
-                </span>
-              </td>
-              <td>
-                <span class="badge" 
-                  [class.badge-success]="issue.result === 'Matched'"
-                  [class.badge-danger]="issue.result === 'Missed'"
-                  [class.badge-warning]="issue.result === 'False Positive'">
-                  {{ issue.result }}
-                </span>
-              </td>
-            </tr>
+      @if (isLoading()) {
+        <app-loader message="Loading QA data..." />
+      } @else if (error()) {
+        <app-error-state [message]="error()!" (retry)="reload()" />
+      } @else {
+        <div class="qa-summary-grid">
+          @for (item of qaSummary(); track item.label) {
+            <div class="qa-summary-card" [class]="item.color">
+              <div class="summary-icon">{{ item.icon }}</div>
+              <div class="summary-value">{{ item.value }}</div>
+              <div class="summary-label">{{ item.label }}</div>
+            </div>
           }
-        </tbody>
-      </table>
+        </div>
+
+        <!-- Entries Table -->
+        <h2 class="section-title mt-4">Submitted Entries</h2>
+        @if (entries().length === 0) {
+          <div class="empty-entries">
+            <i class="fas fa-inbox"></i>
+            <p>No entries submitted yet. Use the form to add your first QA entry.</p>
+          </div>
+        } @else {
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Module</th>
+                <th>Type</th>
+                <th>Severity</th>
+                <th>Description</th>
+                <th>Reported By</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of entries(); track entry.id) {
+                <tr>
+                  <td>{{ entry.moduleName }}</td>
+                  <td>
+                    <span class="badge"
+                      [class.badge-danger]="entry.issueType === 'Bug'"
+                      [class.badge-warning]="entry.issueType === 'Vulnerability'"
+                      [class.badge-success]="entry.issueType === 'Code Smell'">
+                      {{ entry.issueType }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge"
+                      [class.badge-danger]="entry.severity === 'Critical' || entry.severity === 'High'"
+                      [class.badge-warning]="entry.severity === 'Medium'"
+                      [class.badge-success]="entry.severity === 'Low'">
+                      {{ entry.severity }}
+                    </span>
+                  </td>
+                  <td>{{ entry.description ?? '—' }}</td>
+                  <td>{{ entry.reportedBy ?? '—' }}</td>
+                  <td>{{ formatDate(entry.entryDate) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      }
     </div>
   </div>
 </div>

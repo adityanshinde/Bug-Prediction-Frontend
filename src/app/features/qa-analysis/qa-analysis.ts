@@ -1,74 +1,140 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, effect, computed } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { QASummary, ComparisonData, QAFormData } from '../../core/models';
+import { Loader } from '../../shared/components/loader/loader';
+import { ErrorState } from '../../shared/components/error-state/error-state';
+import { ProjectService } from '../../core/services/project';
+import { QaService } from '../../core/services/qa';
+import { MetricsService } from '../../core/services/metrics';
+import { QASummaryDto, QAEntryResponseDto } from '../../core/models/api.models';
+import { QASummary } from '../../core/models';
 
 @Component({
   selector: 'app-qa-analysis',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Loader, ErrorState],
   templateUrl: './qa-analysis.html',
   styleUrl: './qa-analysis.css',
 })
 export class QaAnalysis {
-  isLoading = signal(false);
-  error = signal<string | null>(null);
-  qaForm: FormGroup;
-  formSubmitted = signal(false);
-  
-  qaSummary: QASummary[] = [
-    { icon: '✓', value: 9, label: 'Matched Issues', color: 'success' },
-    { icon: '✕', value: 3, label: 'Missed Issues', color: 'danger' },
-    { icon: '!', value: 2, label: 'False Positives', color: 'warning' },
-    { icon: '●', value: '78%', label: 'Accuracy %', color: 'info' }
-  ];
+  protected projectService = inject(ProjectService);
+  private qaService        = inject(QaService);
+  private metricsService   = inject(MetricsService);
+  private fb               = inject(FormBuilder);
 
-  moduleOptions = [
-    'UserAuth.js',
-    'PaymentProcessing.js',
-    'EmailService.js',
-    'DatabaseHandler.js',
-    'APIGateway.js'
-  ];
+  isLoading        = signal(false);
+  isSubmitting     = signal(false);
+  error            = signal<string | null>(null);
+  submitSuccess    = signal(false);
+  formSubmitted    = signal(false);
+  data             = signal<QASummaryDto | null>(null);
+  moduleOptions    = signal<string[]>([]);
 
-  issueTypes = ['Bug', 'Vulnerability', 'Code Smell'];
+  noProjectSelected = computed(() => this.projectService.selectedProjectId() === null);
+
+  qaSummary = computed<QASummary[]>(() => {
+    const d = this.data();
+    return [
+      { icon: '●', value: d?.totalEntries       ?? 0, label: 'Total Entries',         color: 'info'    },
+      { icon: '✕', value: d?.bugEntries          ?? 0, label: 'Bug Entries',           color: 'danger'  },
+      { icon: '!', value: d?.vulnerabilityEntries ?? 0, label: 'Vulnerability Entries', color: 'warning' },
+      { icon: '✓', value: d?.codeSmellEntries    ?? 0, label: 'Code Smell Entries',    color: 'success' },
+    ];
+  });
+
+  entries = computed<QAEntryResponseDto[]>(() => this.data()?.entries ?? []);
+
+  issueTypes     = ['Bug', 'Vulnerability', 'Code Smell'];
   severityLevels = ['Critical', 'High', 'Medium', 'Low'];
 
-  constructor(private fb: FormBuilder) {
+  qaForm: FormGroup;
+
+  constructor() {
     this.qaForm = this.fb.group({
-      module: ['', Validators.required],
-      issueType: ['', Validators.required],
-      severity: ['', Validators.required],
-      description: ['', [Validators.required, Validators.minLength(10)]]
+      module:      ['', Validators.required],
+      issueType:   ['', Validators.required],
+      severity:    ['', Validators.required],
+      description: ['', [Validators.minLength(10)]],
+      reportedBy:  [''],
+    });
+
+    effect(() => {
+      const id = this.projectService.selectedProjectId();
+      if (id !== null) {
+        this.loadData(id);
+        this.loadModules(id);
+      } else {
+        this.data.set(null);
+        this.moduleOptions.set([]);
+      }
     });
   }
 
-  onSubmit() {
+  loadData(projectId: number): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+    this.qaService.getQAEntries(projectId).subscribe({
+      next: (d) => { this.data.set(d); this.isLoading.set(false); },
+      error: (err) => {
+        this.error.set(err.status === 404 ? 'No QA entries found for this project yet.' : 'Failed to load QA data.');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  loadModules(projectId: number): void {
+    this.metricsService.getMetrics(projectId).subscribe({
+      next: (d) => this.moduleOptions.set(d.moduleMetrics.map(m => m.moduleName)),
+      error: () => this.moduleOptions.set([])
+    });
+  }
+
+  reload(): void {
+    const id = this.projectService.selectedProjectId();
+    if (id !== null) this.loadData(id);
+  }
+
+  onSubmit(): void {
     this.formSubmitted.set(true);
-    if (this.qaForm.valid) {
-      const formData: QAFormData = this.qaForm.value;
-      console.log('QA Form submitted:', formData);
-      // TODO: API call to submit form data
-      this.qaForm.reset();
-      this.formSubmitted.set(false);
-    }
+    if (this.qaForm.invalid) return;
+
+    const projectId = this.projectService.selectedProjectId();
+    if (projectId === null) return;
+
+    this.isSubmitting.set(true);
+    this.submitSuccess.set(false);
+
+    const raw = this.qaForm.value;
+    this.qaService.submitQAEntry(projectId, {
+      moduleName:  raw['module'],
+      issueType:   raw['issueType'],
+      severity:    raw['severity'],
+      description: raw['description'] || undefined,
+      reportedBy:  raw['reportedBy']  || undefined,
+    }).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.submitSuccess.set(true);
+        this.qaForm.reset();
+        this.formSubmitted.set(false);
+        this.loadData(projectId);
+      },
+      error: () => {
+        this.isSubmitting.set(false);
+        this.error.set('Failed to submit QA entry. Please try again.');
+      }
+    });
   }
 
   getErrorMessage(fieldName: string): string {
     const control = this.qaForm.get(fieldName);
-    if (control?.hasError('required')) {
-      return `${fieldName} is required`;
-    }
+    if (control?.hasError('required'))   return `${fieldName} is required`;
     if (control?.hasError('minlength')) {
-      const minLength = control.errors?.['minlength'].requiredLength;
-      return `Minimum ${minLength} characters required`;
+      const min = control.errors?.['minlength'].requiredLength;
+      return `Minimum ${min} characters required`;
     }
     return '';
   }
 
-  comparisonData: ComparisonData[] = [
-    { name: 'Null Pointer Exception', manualFound: true, automatedFound: true, result: 'Matched' },
-    { name: 'SQL Injection', manualFound: true, automatedFound: false, result: 'Missed' },
-    { name: 'Unused Variable', manualFound: false, automatedFound: true, result: 'False Positive' },
-    { name: 'Hardcoded Password', manualFound: true, automatedFound: true, result: 'Matched' },
-    { name: 'Memory Leak', manualFound: false, automatedFound: false, result: 'Missed' }
-  ];
+  formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
 }

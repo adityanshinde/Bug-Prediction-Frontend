@@ -13,7 +13,7 @@ import { OverallRisk, ModuleRiskChartData } from '../../core/models';
   styleUrl: './risk-analysis.css',
 })
 export class RiskAnalysis {
-  private projectService = inject(ProjectService);
+  protected projectService = inject(ProjectService);
   private riskService    = inject(RiskService);
 
   isLoading = signal(false);

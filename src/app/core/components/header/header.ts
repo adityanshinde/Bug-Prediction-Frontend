@@ -9,7 +9,7 @@ import { HeaderDto } from '../../models/api.models';
   styleUrl: './header.css',
 })
 export class Header {
-  private projectService = inject(ProjectService);
+  protected projectService = inject(ProjectService);
 
   headerData = signal<HeaderDto | null>(null);
   isLoading = signal(false);
