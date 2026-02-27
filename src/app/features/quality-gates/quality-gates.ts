@@ -50,6 +50,34 @@ export class QualityGates {
     } as GateHistory))
   );
 
+  readonly PAGE_SIZE = 7;
+  historyPage = signal(1);
+  historyTotalPages = computed(() => Math.max(1, Math.ceil(this.gateHistory().length / this.PAGE_SIZE)));
+  pagedHistory      = computed(() => {
+    const start = (this.historyPage() - 1) * this.PAGE_SIZE;
+    return this.gateHistory().slice(start, start + this.PAGE_SIZE);
+  });
+  historyPageNumbers = computed<number[]>(() => Array.from({ length: this.historyTotalPages() }, (_, i) => i + 1));
+  historyPageItems   = computed<(number | null)[]>(() => this.buildPageItems(this.historyPage(), this.historyTotalPages()));
+  historyPageStart   = computed(() => (this.historyPage() - 1) * this.PAGE_SIZE + 1);
+  historyPageEnd     = computed(() => Math.min(this.historyPage() * this.PAGE_SIZE, this.gateHistory().length));
+  goToHistoryPage(page: number): void {
+    if (page >= 1 && page <= this.historyTotalPages()) this.historyPage.set(page);
+  }
+
+  private buildPageItems(current: number, total: number): (number | null)[] {
+    if (total <= 1) return [1];
+    const delta = 2;
+    const items: (number | null)[] = [1];
+    const rangeStart = Math.max(2, current - delta);
+    const rangeEnd   = Math.min(total - 1, current + delta);
+    if (rangeStart > 2) items.push(null);
+    for (let i = rangeStart; i <= rangeEnd; i++) items.push(i);
+    if (rangeEnd < total - 1) items.push(null);
+    items.push(total);
+    return items;
+  }
+
   constructor() {
     effect(() => {
       const id = this.projectService.selectedProjectId();
@@ -60,6 +88,7 @@ export class QualityGates {
   loadQualityGates(projectId: number): void {
     this.isLoading.set(true);
     this.error.set(null);
+    this.historyPage.set(1);
     this.qualityGateService.getQualityGates(projectId).subscribe({
       next: (d) => { this.data.set(d); this.isLoading.set(false); },
       error: (err) => {

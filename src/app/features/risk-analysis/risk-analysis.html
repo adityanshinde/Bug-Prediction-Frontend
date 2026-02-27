@@ -93,7 +93,7 @@
               </td>
             </tr>
           } @else {
-            @for (module of computedModules(); track module.moduleName) {
+            @for (module of pagedModules(); track module.moduleName) {
               <tr>
                 <td><strong>{{ module.moduleName }}</strong></td>
                 <td>{{ module.bugs }}</td>
@@ -114,6 +114,29 @@
         </tbody>
       </table>
     </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination-bar">
+        <span class="page-info">
+          Showing {{ pageStart() }}–{{ pageEnd() }} of {{ computedModules().length }} modules
+        </span>
+        <div class="page-controls">
+          <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          @for (item of pageItems(); track $index) {
+            @if (item === null) {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button class="page-btn" [class.active]="item === currentPage()" (click)="goToPage(item)">{{ item }}</button>
+            }
+          }
+          <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    }
   </div>
 
   } <!-- end @else if (data()) -->

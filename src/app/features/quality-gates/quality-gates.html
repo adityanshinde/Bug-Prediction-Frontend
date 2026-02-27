@@ -63,7 +63,7 @@
     </div>
 
     <!-- Gate Conditions (Duplicate section as shown in image) -->
-    <div class="gate-conditions-card">
+    <!-- <div class="gate-conditions-card">
       <h2 class="section-title">Gate Conditions</h2>
       <div class="simple-conditions-list">
         @for (condition of gateConditions(); track condition.name) {
@@ -84,7 +84,7 @@
           </div>
         }
       </div>
-    </div>
+    </div> -->
   </div>
 
   <!-- Gate History -->
@@ -100,7 +100,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (history of gateHistory(); track history.date) {
+        @for (history of pagedHistory(); track history.date) {
           <tr>
             <td>{{ history.date }}</td>
             <td>{{ history.branch }}</td>
@@ -116,6 +116,27 @@
         }
       </tbody>
     </table>
+
+    @if (historyTotalPages() > 1) {
+      <div class="pagination-bar">
+        <span class="page-info">Showing {{ historyPageStart() }}–{{ historyPageEnd() }} of {{ gateHistory().length }} entries</span>
+        <div class="page-controls">
+          <button class="page-btn" [disabled]="historyPage() === 1" (click)="goToHistoryPage(historyPage() - 1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          @for (item of historyPageItems(); track $index) {
+            @if (item === null) {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button class="page-btn" [class.active]="item === historyPage()" (click)="goToHistoryPage(item)">{{ item }}</button>
+            }
+          }
+          <button class="page-btn" [disabled]="historyPage() === historyTotalPages()" (click)="goToHistoryPage(historyPage() + 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    }
   </div>
 
   } <!-- end @else if (data()) -->

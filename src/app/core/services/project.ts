@@ -6,14 +6,30 @@ import { ProjectListDto, HeaderDto, ScanHistoryDto } from '../models/api.models'
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
   private http = inject(HttpClient);
+  private readonly STORAGE_KEY = 'bpq_selected_project';
 
-  // Global selected project state — all pages react to this
-  selectedProjectId = signal<number | null>(null);
-  selectedProject = signal<ProjectListDto | null>(null);
+  // Restored from localStorage on page load so refresh doesn't lose selection
+  selectedProjectId = signal<number | null>(
+    (() => {
+      try {
+        const saved = localStorage.getItem(this.STORAGE_KEY);
+        return saved ? (JSON.parse(saved) as ProjectListDto).projectId : null;
+      } catch { return null; }
+    })()
+  );
+  selectedProject = signal<ProjectListDto | null>(
+    (() => {
+      try {
+        const saved = localStorage.getItem(this.STORAGE_KEY);
+        return saved ? (JSON.parse(saved) as ProjectListDto) : null;
+      } catch { return null; }
+    })()
+  );
 
   setSelectedProject(project: ProjectListDto): void {
     this.selectedProject.set(project);
     this.selectedProjectId.set(project.projectId);
+    try { localStorage.setItem(this.STORAGE_KEY, JSON.stringify(project)); } catch { /* ignore */ }
   }
 
   getProjects(): Observable<ProjectListDto[]> {

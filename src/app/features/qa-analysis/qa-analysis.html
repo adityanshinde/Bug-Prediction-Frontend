@@ -101,14 +101,27 @@
           }
         </div>
 
-        <!-- Entries Table -->
-        <h2 class="section-title mt-4">Submitted Entries</h2>
+        <!-- Comparison: Manual vs Automated -->
+        <h2 class="section-title mt-4">Manual vs Automated Comparison</h2>
+
         @if (entries().length === 0) {
           <div class="empty-entries">
             <i class="fas fa-inbox"></i>
             <p>No entries submitted yet. Use the form to add your first QA entry.</p>
           </div>
         } @else {
+          <!-- Comparison summary bar -->
+          <div class="comparison-stats-bar">
+            <span class="cstat matched">
+              <i class="fas fa-check-circle"></i>
+              Matched by Automation: <strong>{{ matchedCount() }}</strong>
+            </span>
+            <span class="cstat manual-only">
+              <i class="fas fa-exclamation-circle"></i>
+              Manual Only (not in scan): <strong>{{ manualOnlyCount() }}</strong>
+            </span>
+          </div>
+
           <table class="comparison-table">
             <thead>
               <tr>
@@ -117,32 +130,46 @@
                 <th>Severity</th>
                 <th>Description</th>
                 <th>Reported By</th>
-                <th>Date</th>
+                <th>Automated Found</th>
+                <th>Result</th>
               </tr>
             </thead>
             <tbody>
-              @for (entry of entries(); track entry.id) {
-                <tr>
-                  <td>{{ entry.moduleName }}</td>
+              @for (row of comparisonData(); track row.id) {
+                <tr [class.row-matched]="row.result === 'Matched'" [class.row-manual-only]="row.result === 'Manual Only'">
+                  <td>{{ row.moduleName }}</td>
                   <td>
                     <span class="badge"
-                      [class.badge-danger]="entry.issueType === 'Bug'"
-                      [class.badge-warning]="entry.issueType === 'Vulnerability'"
-                      [class.badge-success]="entry.issueType === 'Code Smell'">
-                      {{ entry.issueType }}
+                      [class.badge-danger]="row.issueType === 'Bug'"
+                      [class.badge-warning]="row.issueType === 'Vulnerability'"
+                      [class.badge-success]="row.issueType === 'Code Smell'">
+                      {{ row.issueType }}
                     </span>
                   </td>
                   <td>
                     <span class="badge"
-                      [class.badge-danger]="entry.severity === 'Critical' || entry.severity === 'High'"
-                      [class.badge-warning]="entry.severity === 'Medium'"
-                      [class.badge-success]="entry.severity === 'Low'">
-                      {{ entry.severity }}
+                      [class.badge-danger]="row.severity === 'Critical' || row.severity === 'High'"
+                      [class.badge-warning]="row.severity === 'Medium'"
+                      [class.badge-success]="row.severity === 'Low'">
+                      {{ row.severity }}
                     </span>
                   </td>
-                  <td>{{ entry.description ?? '—' }}</td>
-                  <td>{{ entry.reportedBy ?? '—' }}</td>
-                  <td>{{ formatDate(entry.entryDate) }}</td>
+                  <td>{{ row.description ?? '—' }}</td>
+                  <td>{{ row.reportedBy ?? '—' }}</td>
+                  <td class="automated-count">
+                    @if (row.automatedCount > 0) {
+                      <span class="auto-found"><i class="fas fa-robot"></i> {{ row.automatedCount }} issue{{ row.automatedCount > 1 ? 's' : '' }}</span>
+                    } @else {
+                      <span class="auto-not-found"><i class="fas fa-minus-circle"></i> Not detected</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="badge"
+                      [class.badge-success]="row.result === 'Matched'"
+                      [class.badge-warning]="row.result === 'Manual Only'">
+                      {{ row.result }}
+                    </span>
+                  </td>
                 </tr>
               }
             </tbody>

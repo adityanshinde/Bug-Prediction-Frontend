@@ -45,6 +45,34 @@ export class Metrics {
     }))
   );
 
+  readonly PAGE_SIZE = 7;
+  modulePage = signal(1);
+  moduleTotalPages = computed(() => Math.max(1, Math.ceil(this.moduleMetrics().length / this.PAGE_SIZE)));
+  pagedModules     = computed(() => {
+    const start = (this.modulePage() - 1) * this.PAGE_SIZE;
+    return this.moduleMetrics().slice(start, start + this.PAGE_SIZE);
+  });
+  modulePageNumbers = computed<number[]>(() => Array.from({ length: this.moduleTotalPages() }, (_, i) => i + 1));
+  modulePageItems   = computed<(number | null)[]>(() => this.buildPageItems(this.modulePage(), this.moduleTotalPages()));
+  modulePageStart   = computed(() => (this.modulePage() - 1) * this.PAGE_SIZE + 1);
+  modulePageEnd     = computed(() => Math.min(this.modulePage() * this.PAGE_SIZE, this.moduleMetrics().length));
+  goToModulePage(page: number): void {
+    if (page >= 1 && page <= this.moduleTotalPages()) this.modulePage.set(page);
+  }
+
+  private buildPageItems(current: number, total: number): (number | null)[] {
+    if (total <= 1) return [1];
+    const delta = 2;
+    const items: (number | null)[] = [1];
+    const rangeStart = Math.max(2, current - delta);
+    const rangeEnd   = Math.min(total - 1, current + delta);
+    if (rangeStart > 2) items.push(null);
+    for (let i = rangeStart; i <= rangeEnd; i++) items.push(i);
+    if (rangeEnd < total - 1) items.push(null);
+    items.push(total);
+    return items;
+  }
+
   /** SVG polyline points for coverage trend (viewBox 0 0 600 250) */
   coverageTrendPoints = computed<string>(() => {
     const trend = this.data()?.coverageTrend ?? [];
@@ -74,6 +102,7 @@ export class Metrics {
   loadMetrics(projectId: number): void {
     this.isLoading.set(true);
     this.error.set(null);
+    this.modulePage.set(1);
     this.metricsService.getMetrics(projectId).subscribe({
       next: (d) => { this.data.set(d); this.isLoading.set(false); },
       error: (err) => {

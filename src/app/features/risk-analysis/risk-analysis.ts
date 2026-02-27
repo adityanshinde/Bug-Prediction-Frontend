@@ -30,6 +30,41 @@ export class RiskAnalysis {
     }).sort((a, b) => b.riskScore - a.riskScore)
   );
 
+  readonly PAGE_SIZE = 7;
+  currentPage = signal(1);
+
+  totalPages = computed(() => Math.max(1, Math.ceil(this.computedModules().length / this.PAGE_SIZE)));
+
+  pagedModules = computed<ComputedModuleRisk[]>(() => {
+    const start = (this.currentPage() - 1) * this.PAGE_SIZE;
+    return this.computedModules().slice(start, start + this.PAGE_SIZE);
+  });
+
+  pageNumbers = computed<number[]>(() =>
+    Array.from({ length: this.totalPages() }, (_, i) => i + 1)
+  );
+
+  pageEnd = computed(() => Math.min(this.currentPage() * this.PAGE_SIZE, this.computedModules().length));
+  pageStart = computed(() => (this.currentPage() - 1) * this.PAGE_SIZE + 1);
+  pageItems = computed<(number | null)[]>(() => this.buildPageItems(this.currentPage(), this.totalPages()));
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) this.currentPage.set(page);
+  }
+
+  private buildPageItems(current: number, total: number): (number | null)[] {
+    if (total <= 1) return [1];
+    const delta = 2;
+    const items: (number | null)[] = [1];
+    const rangeStart = Math.max(2, current - delta);
+    const rangeEnd   = Math.min(total - 1, current + delta);
+    if (rangeStart > 2) items.push(null);
+    for (let i = rangeStart; i <= rangeEnd; i++) items.push(i);
+    if (rangeEnd < total - 1) items.push(null);
+    items.push(total);
+    return items;
+  }
+
   /** Overall risk aggregated from all computed modules */
   overallRisk = computed<OverallRisk>(() => {
     const mods = this.computedModules();
@@ -66,6 +101,7 @@ export class RiskAnalysis {
   loadRiskAnalysis(projectId: number): void {
     this.isLoading.set(true);
     this.error.set(null);
+    this.currentPage.set(1);
     this.riskService.getRiskAnalysis(projectId).subscribe({
       next: (d) => { this.data.set(d); this.isLoading.set(false); },
       error: (err) => {

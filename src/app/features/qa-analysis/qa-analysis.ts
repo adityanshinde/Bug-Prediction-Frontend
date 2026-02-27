@@ -5,8 +5,13 @@ import { ErrorState } from '../../shared/components/error-state/error-state';
 import { ProjectService } from '../../core/services/project';
 import { QaService } from '../../core/services/qa';
 import { MetricsService } from '../../core/services/metrics';
-import { QASummaryDto, QAEntryResponseDto } from '../../core/models/api.models';
+import { QASummaryDto, QAEntryResponseDto, MetricsDto } from '../../core/models/api.models';
 import { QASummary } from '../../core/models';
+
+export interface ComparisonRow extends QAEntryResponseDto {
+  automatedCount: number;
+  result: 'Matched' | 'Manual Only';
+}
 
 @Component({
   selector: 'app-qa-analysis',
@@ -26,6 +31,7 @@ export class QaAnalysis {
   submitSuccess    = signal(false);
   formSubmitted    = signal(false);
   data             = signal<QASummaryDto | null>(null);
+  metricsData      = signal<MetricsDto | null>(null);
   moduleOptions    = signal<string[]>([]);
 
   noProjectSelected = computed(() => this.projectService.selectedProjectId() === null);
@@ -33,14 +39,34 @@ export class QaAnalysis {
   qaSummary = computed<QASummary[]>(() => {
     const d = this.data();
     return [
-      { icon: '●', value: d?.totalEntries       ?? 0, label: 'Total Entries',         color: 'info'    },
-      { icon: '✕', value: d?.bugEntries          ?? 0, label: 'Bug Entries',           color: 'danger'  },
-      { icon: '!', value: d?.vulnerabilityEntries ?? 0, label: 'Vulnerability Entries', color: 'warning' },
-      { icon: '✓', value: d?.codeSmellEntries    ?? 0, label: 'Code Smell Entries',    color: 'success' },
+      { icon: '●', value: d?.totalEntries        ?? 0, label: 'Total Entries',          color: 'info'    },
+      { icon: '✕', value: d?.bugEntries           ?? 0, label: 'Bug Entries',            color: 'danger'  },
+      { icon: '!', value: d?.vulnerabilityEntries ?? 0, label: 'Vulnerability Entries',  color: 'warning' },
+      { icon: '✓', value: d?.codeSmellEntries     ?? 0, label: 'Code Smell Entries',     color: 'success' },
     ];
   });
 
   entries = computed<QAEntryResponseDto[]>(() => this.data()?.entries ?? []);
+
+  /** For each manual entry cross-reference automated scan results by module + issueType */
+  comparisonData = computed<ComparisonRow[]>(() => {
+    const entries  = this.data()?.entries ?? [];
+    const modules  = this.metricsData()?.moduleMetrics ?? [];
+
+    return entries.map(entry => {
+      const mod = modules.find(m => m.moduleName === entry.moduleName);
+      const automatedCount =
+        !mod ? 0
+        : entry.issueType === 'Bug'           ? mod.bugs
+        : entry.issueType === 'Vulnerability' ? mod.vulnerabilities
+        : entry.issueType === 'Code Smell'    ? mod.codeSmells
+        : 0;
+      return { ...entry, automatedCount, result: automatedCount > 0 ? 'Matched' as const : 'Manual Only' as const };
+    });
+  });
+
+  matchedCount    = computed(() => this.comparisonData().filter(r => r.result === 'Matched').length);
+  manualOnlyCount = computed(() => this.comparisonData().filter(r => r.result === 'Manual Only').length);
 
   issueTypes     = ['Bug', 'Vulnerability', 'Code Smell'];
   severityLevels = ['Critical', 'High', 'Medium', 'Low'];
@@ -82,7 +108,10 @@ export class QaAnalysis {
 
   loadModules(projectId: number): void {
     this.metricsService.getMetrics(projectId).subscribe({
-      next: (d) => this.moduleOptions.set(d.moduleMetrics.map(m => m.moduleName)),
+      next: (d) => {
+        this.metricsData.set(d);
+        this.moduleOptions.set(d.moduleMetrics.map(m => m.moduleName));
+      },
       error: () => this.moduleOptions.set([])
     });
   }
