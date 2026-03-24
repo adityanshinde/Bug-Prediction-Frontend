@@ -12,6 +12,10 @@
     <app-error-state [message]="error()!" (retry)="reload()" />
   } @else if (data()) {
 
+
+
+
+
     <!-- KPI Cards -->
     <div class="kpi-grid">
       @for (kpi of kpiData(); track kpi.label) {
@@ -67,6 +71,9 @@
       </div>
     </div>
 
+
+
+
     <!-- Recent Scans Table -->
     <div class="table-card">
       <h2 class="table-title">Recent Scans</h2>
@@ -112,5 +119,22 @@
       </div>
     </div>
 
+    <!-- AI Insights Card (moved to end) -->
+    <div class="ai-card">
+      <h2 class="ai-title"><i class="fas fa-robot"></i> AI Insights</h2>
+      @if (aiLoading()) {
+        <app-loader message="Loading AI insights..." />
+      } @else if (aiError()) {
+        <app-error-state [message]="aiError()!" (retry)="reload()" />
+      } @else if (aiInsights()) {
+        <div class="ai-insights-content">
+          <pre>{{ aiInsights()?.insights ?? '' }}</pre>
+        </div>
+      } @else {
+        <div class="ai-summary">
+          <strong>AI-powered analysis and predictions for your project.</strong>
+        </div>
+      }
+    </div>
   } <!-- end @else if (data()) -->
 </div>

@@ -6,6 +6,9 @@ import { ProjectService } from '../../core/services/project';
 import { DashboardService } from '../../core/services/dashboard';
 import { DashboardDto } from '../../core/models/api.models';
 import { KpiData, OverallRiskData, ChartLegendItem, RecentScan } from '../../core/models';
+import { AIService, AIInsightsResponse } from '../../services/ai.service';
+
+
 
 @Component({
   selector: 'app-dashboard',
@@ -16,6 +19,12 @@ import { KpiData, OverallRiskData, ChartLegendItem, RecentScan } from '../../cor
 export class Dashboard {
   protected projectService = inject(ProjectService);
   private dashboardService = inject(DashboardService);
+
+  // AI Insights state
+  private aiService = inject(AIService);
+  aiInsights = signal<AIInsightsResponse | null>(null);
+  aiLoading = signal(false);
+  aiError = signal<string | null>(null);
 
   isLoading = signal(false);
   error = signal<string | null>(null);
@@ -77,6 +86,7 @@ export class Dashboard {
       const id = this.projectService.selectedProjectId();
       if (id !== null) {
         this.loadDashboard(id);
+        this.loadAiInsights(id);
       }
     });
   }
@@ -95,6 +105,31 @@ export class Dashboard {
 
   reload(): void {
     const id = this.projectService.selectedProjectId();
-    if (id !== null) this.loadDashboard(id);
+    if (id !== null) {
+      this.loadDashboard(id);
+      this.loadAiInsights(id);
+    }
+  }
+
+  loadAiInsights(projectId: number): void {
+    this.aiLoading.set(true);
+    this.aiError.set(null);
+    this.aiInsights.set(null);
+    this.aiService.getDashboardInsights(projectId).subscribe({
+      next: (data) => {
+        this.aiInsights.set(data);
+        this.aiLoading.set(false);
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.aiError.set('No AI insights found for this project.');
+        } else if (err.status === 503) {
+          this.aiError.set('AI service temporarily unavailable. Please try again later.');
+        } else {
+          this.aiError.set('Failed to load AI insights.');
+        }
+        this.aiLoading.set(false);
+      }
+    });
   }
 }
