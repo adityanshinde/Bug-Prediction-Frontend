@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ProjectListDto, HeaderDto, ScanHistoryDto } from '../models/api.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
@@ -33,22 +34,22 @@ export class ProjectService {
   }
 
   getProjects(): Observable<ProjectListDto[]> {
-    return this.http.get<ProjectListDto[]>('/api/projects');
+    return this.http.get<ProjectListDto[]>(`${environment.apiBaseUrl}/projects`);
   }
 
   getHeader(projectId: number): Observable<HeaderDto> {
-    return this.http.get<HeaderDto>(`/api/projects/${projectId}/header`);
+    return this.http.get<HeaderDto>(`${environment.apiBaseUrl}/projects/${projectId}/header`);
   }
 
   getScanHistory(projectId: number): Observable<ScanHistoryDto[]> {
-    return this.http.get<ScanHistoryDto[]>(`/api/projects/${projectId}/scan-history`);
+    return this.http.get<ScanHistoryDto[]>(`${environment.apiBaseUrl}/projects/${projectId}/scan-history`);
   }
 
   syncProject(projectKey: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`/api/sync/${projectKey}`, {});
+    return this.http.post<{ message: string }>(`${environment.apiBaseUrl}/sync/${projectKey}`, {});
   }
 
   syncAll(): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>('/api/sync/all', {});
+    return this.http.post<{ message: string }>(`${environment.apiBaseUrl}/sync/all`, {});
   }
 }

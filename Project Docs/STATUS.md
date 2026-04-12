@@ -1,6 +1,6 @@
 # Bug Prediction & Code Quality Dashboard - Project Status
 
-**Last Updated:** February 27, 2026  
+**Last Updated:** April 12, 2026  
 **Project Status:** 🟢 API Integration Complete — Pagination & Chart Legend Polish Done
 
 ---
@@ -194,6 +194,12 @@
   - No-project banner for unselected state
 - ✅ Added `.success-banner` and `.empty-entries` CSS to `styles.css`
 - ✅ `ng build` → 0 errors, 0 warnings
+
+### **Phase 13: Centralized API Base URL** (April 12, 2026)
+- ✅ Moved all frontend HTTP calls to `environment.apiBaseUrl`
+- ✅ Production base points to `https://bug-prediction-backend.onrender.com/api`
+- ✅ Development base uses `/api` so the Vite/Angular proxy still works locally
+- ✅ Removed hardcoded API host/path strings from all core service files
 
 ---
 
@@ -759,6 +765,7 @@ getRiskAnalysis(): Observable<any> {
 5. ✅ Bugs vs Vulnerabilities chart — color legend added (red=Bugs, blue=Vulnerabilities)
 6. ✅ `.page-ellipsis` CSS added to `styles.css`
 7. ✅ Build verified: 0 errors, 0 warnings
+8. ✅ Vercel deployment config added (`vercel.json`) for static hosting
 
 ### **Remaining / Optional**
 1. **Dynamic Charts** — Replace hardcoded SVG with Chart.js/D3.js for live data
@@ -828,6 +835,7 @@ getRiskAnalysis(): Observable<any> {
 ### **Modified Files**
 - `angular.json` - Added FontAwesome CSS to styles array
 - `package.json` - Added @fortawesome/fontawesome-free dependency
+- `vercel.json` - Vercel build/output config for deployment
 - All component TypeScript files:
   - Added TypeScript interfaces for type safety
   - Added loading states (`isLoading`, `error` signals)
