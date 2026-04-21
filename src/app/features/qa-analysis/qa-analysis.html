@@ -122,58 +122,60 @@
             </span>
           </div>
 
-          <table class="comparison-table">
-            <thead>
-              <tr>
-                <th>Module</th>
-                <th>Type</th>
-                <th>Severity</th>
-                <th>Description</th>
-                <th>Reported By</th>
-                <th>Automated Found</th>
-                <th>Result</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of comparisonData(); track row.id) {
-                <tr [class.row-matched]="row.result === 'Matched'" [class.row-manual-only]="row.result === 'Manual Only'">
-                  <td>{{ row.moduleName }}</td>
-                  <td>
-                    <span class="badge"
-                      [class.badge-danger]="row.issueType === 'Bug'"
-                      [class.badge-warning]="row.issueType === 'Vulnerability'"
-                      [class.badge-success]="row.issueType === 'Code Smell'">
-                      {{ row.issueType }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge"
-                      [class.badge-danger]="row.severity === 'Critical' || row.severity === 'High'"
-                      [class.badge-warning]="row.severity === 'Medium'"
-                      [class.badge-success]="row.severity === 'Low'">
-                      {{ row.severity }}
-                    </span>
-                  </td>
-                  <td>{{ row.description ?? '—' }}</td>
-                  <td>{{ row.reportedBy ?? '—' }}</td>
-                  <td class="automated-count">
-                    @if (row.automatedCount > 0) {
-                      <span class="auto-found"><i class="fas fa-robot"></i> {{ row.automatedCount }} issue{{ row.automatedCount > 1 ? 's' : '' }}</span>
-                    } @else {
-                      <span class="auto-not-found"><i class="fas fa-minus-circle"></i> Not detected</span>
-                    }
-                  </td>
-                  <td>
-                    <span class="badge"
-                      [class.badge-success]="row.result === 'Matched'"
-                      [class.badge-warning]="row.result === 'Manual Only'">
-                      {{ row.result }}
-                    </span>
-                  </td>
+          <div class="table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Module</th>
+                  <th>Type</th>
+                  <th>Severity</th>
+                  <th>Description</th>
+                  <th>Reported By</th>
+                  <th>Automated Found</th>
+                  <th>Result</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (row of comparisonData(); track row.id) {
+                  <tr [class.row-matched]="row.result === 'Matched'" [class.row-manual-only]="row.result === 'Manual Only'">
+                    <td>{{ row.moduleName }}</td>
+                    <td>
+                      <span class="badge"
+                        [class.badge-danger]="row.issueType === 'Bug'"
+                        [class.badge-warning]="row.issueType === 'Vulnerability'"
+                        [class.badge-success]="row.issueType === 'Code Smell'">
+                        {{ row.issueType }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge"
+                        [class.badge-danger]="row.severity === 'Critical' || row.severity === 'High'"
+                        [class.badge-warning]="row.severity === 'Medium'"
+                        [class.badge-success]="row.severity === 'Low'">
+                        {{ row.severity }}
+                      </span>
+                    </td>
+                    <td>{{ row.description ?? '—' }}</td>
+                    <td>{{ row.reportedBy ?? '—' }}</td>
+                    <td class="automated-count">
+                      @if (row.automatedCount > 0) {
+                        <span class="auto-found"><i class="fas fa-robot"></i> {{ row.automatedCount }} issue{{ row.automatedCount > 1 ? 's' : '' }}</span>
+                      } @else {
+                        <span class="auto-not-found"><i class="fas fa-minus-circle"></i> Not detected</span>
+                      }
+                    </td>
+                    <td>
+                      <span class="badge"
+                        [class.badge-success]="row.result === 'Matched'"
+                        [class.badge-warning]="row.result === 'Manual Only'">
+                        {{ row.result }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         }
       }
     </div>

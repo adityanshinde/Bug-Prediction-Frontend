@@ -279,9 +279,15 @@
   .table-wrapper {
     overflow-x: auto;
   }
-  
-  .scans-table {
-    font-size: 13px;
+
+  .chart-card,
+  .table-card {
+    padding: 16px;
+  }
+
+  .scans-table th,
+  .scans-table td {
+    white-space: nowrap;
   }
 }
 
@@ -296,25 +302,3 @@
   }
 }
 
-/* Responsive Layout */
-@media (max-width: 1200px) {
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard {
-    padding: 16px;
-  }
-  
-  .kpi-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  
-  .charts-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}

@@ -111,6 +111,7 @@
 
 .chart-container {
   padding: 10px 0;
+  overflow-x: auto;
 }
 
 .bar-chart {
@@ -207,12 +208,45 @@
   .risk-analysis-page {
     padding: 16px;
   }
-  
-  .risk-score {
-    font-size: 48px;
+
+  .overall-risk-card,
+  .risk-chart-card,
+  .risk-table-card {
+    padding: 16px;
   }
-  
-  .risk-level {
-    font-size: 18px;
+
+  .risk-number {
+    font-size: 46px;
+  }
+
+  .risk-text,
+  .risk-status {
+    font-size: 20px;
+  }
+
+  .risk-table th,
+  .risk-table td {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .risk-analysis-page {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .risk-display {
+    padding: 12px;
+  }
+
+  .risk-top {
+    gap: 10px;
+  }
+
+  .risk-icon {
+    width: 46px;
+    height: 46px;
+    font-size: 20px;
   }
 }

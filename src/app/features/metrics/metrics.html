@@ -11,110 +11,106 @@
   } @else if (error()) {
     <app-error-state [message]="error()!" (retry)="reload()" />
   } @else if (data()) {
-
-  <!-- Metrics KPIs -->
-  <div class="metrics-kpi-grid">
-    @for (kpi of metricsKpi(); track kpi.label) {
-      <div class="metric-kpi-card" [class]="'kpi-' + kpi.color">
-        <div class="kpi-icon" [innerHTML]="kpi.icon"></div>
-        <div class="kpi-value">{{ kpi.value }}</div>
-        <div class="kpi-label">{{ kpi.label }}</div>
-      </div>
-    }
-  </div>
-
-  <!-- Charts -->
-  <div class="charts-row">
-    <div class="chart-card">
-      <h2 class="section-title">Coverage Trend</h2>
-      <div class="chart-placeholder">
-        <svg width="100%" height="250" viewBox="0 0 600 250">
-          @if (coverageTrendPoints()) {
-            <polyline [attr.points]="coverageTrendPoints()"
-              fill="none" stroke="#2563EB" stroke-width="3"/>
-            <text x="560" y="85" fill="#2563EB" font-size="14" font-weight="600">{{ latestCoverage() }}</text>
-          }
-          <line x1="50" y1="220" x2="550" y2="220" stroke="#E2E8F0" stroke-width="2"/>
-        </svg>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <h2 class="section-title">Bugs vs Vulnerabilities</h2>
-      <div class="chart-placeholder">
-        <svg width="100%" height="250" viewBox="0 0 600 250">
-          @let bvData = data()!.bugsVsVulnerabilities;
-          @for (item of bvData; track item.date; let i = $index) {
-            @let spacing = bvData.length > 1 ? 500 / (bvData.length - 1) : 250;
-            @let xBase = 80 + i * spacing;
-            <rect [attr.x]="xBase - 20" [attr.y]="220 - (item.bugs / 50) * 180" width="18" [attr.height]="(item.bugs / 50) * 180" fill="#DC2626" opacity="0.8" />
-            <rect [attr.x]="xBase + 2" [attr.y]="220 - (item.vulnerabilities / 50) * 180" width="18" [attr.height]="(item.vulnerabilities / 50) * 180" fill="#3B82F6" opacity="0.8" />
-          }
-          <line x1="50" y1="220" x2="570" y2="220" stroke="#E2E8F0" stroke-width="2"/>
-        </svg>
-        <div class="chart-legend">
-          <span class="legend-item"><span class="legend-dot" style="background:#DC2626"></span>Bugs</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#3B82F6"></span>Vulnerabilities</span>
+    <div class="metrics-kpi-grid">
+      @for (kpi of metricsKpi(); track kpi.label) {
+        <div class="metric-kpi-card" [class]="'kpi-' + kpi.color">
+          <div class="kpi-icon" [innerHTML]="kpi.icon"></div>
+          <div class="kpi-value">{{ kpi.value }}</div>
+          <div class="kpi-label">{{ kpi.label }}</div>
         </div>
-      </div>
+      }
     </div>
-  </div>
 
-  <!-- Module Metrics Table -->
-  <div class="table-card">
-    <h2 class="section-title">Module Metrics</h2>
-    <table class="metrics-table">
-      <thead>
-        <tr>
-          <th>Module Name</th>
-          <th>Bugs</th>
-          <th>Code Smells</th>
-          <th>Coverage %</th>
-          <th>Duplication %</th>
-          <th>Complexity</th>
-          <th>Lines of Code</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if (moduleMetrics().length === 0) {
-          <tr><td colspan="7" class="empty-state"><div class="empty-state-content"><i class="fas fa-inbox"></i><p>No module data available</p></div></td></tr>
-        } @else {
-          @for (module of pagedModules(); track module.name) {
-            <tr>
-              <td><strong>{{ module.name }}</strong></td>
-              <td>{{ module.bugs }}</td>
-              <td>{{ module.codeSmells }}</td>
-              <td>{{ module.coverage }}%</td>
-              <td>{{ module.duplication }}%</td>
-              <td>{{ module.complexity }}</td>
-              <td>{{ module.loc }}</td>
-            </tr>
-          }
-        }
-      </tbody>
-    </table>
-
-    @if (moduleTotalPages() > 1) {
-      <div class="pagination-bar">
-        <span class="page-info">Showing {{ modulePageStart() }}–{{ modulePageEnd() }} of {{ moduleMetrics().length }} modules</span>
-        <div class="page-controls">
-          <button class="page-btn" [disabled]="modulePage() === 1" (click)="goToModulePage(modulePage() - 1)">
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          @for (item of modulePageItems(); track $index) {
-            @if (item === null) {
-              <span class="page-ellipsis">…</span>
-            } @else {
-              <button class="page-btn" [class.active]="item === modulePage()" (click)="goToModulePage(item)">{{ item }}</button>
+    <div class="charts-row">
+      <div class="chart-card">
+        <h2 class="section-title">Coverage Trend</h2>
+        <div class="chart-placeholder">
+          <svg width="100%" height="250" viewBox="0 0 600 250">
+            @if (coverageTrendPoints()) {
+              <polyline [attr.points]="coverageTrendPoints()" fill="none" stroke="#2563EB" stroke-width="3" />
+              <text x="560" y="85" fill="#2563EB" font-size="14" font-weight="600">{{ latestCoverage() }}</text>
             }
-          }
-          <button class="page-btn" [disabled]="modulePage() === moduleTotalPages()" (click)="goToModulePage(modulePage() + 1)">
-            <i class="fas fa-chevron-right"></i>
-          </button>
+            <line x1="50" y1="220" x2="550" y2="220" stroke="#E2E8F0" stroke-width="2" />
+          </svg>
         </div>
       </div>
-    }
-  </div>
 
-  } <!-- end @else if (data()) -->
+      <div class="chart-card">
+        <h2 class="section-title">Bugs vs Vulnerabilities</h2>
+        <div class="chart-placeholder">
+          <svg width="100%" height="250" viewBox="0 0 600 250">
+            @let bvData = data()!.bugsVsVulnerabilities;
+            @for (item of bvData; track item.date; let i = $index) {
+              @let spacing = bvData.length > 1 ? 500 / (bvData.length - 1) : 250;
+              @let xBase = 80 + i * spacing;
+              <rect [attr.x]="xBase - 20" [attr.y]="220 - (item.bugs / 50) * 180" width="18" [attr.height]="(item.bugs / 50) * 180" fill="#DC2626" opacity="0.8" />
+              <rect [attr.x]="xBase + 2" [attr.y]="220 - (item.vulnerabilities / 50) * 180" width="18" [attr.height]="(item.vulnerabilities / 50) * 180" fill="#3B82F6" opacity="0.8" />
+            }
+            <line x1="50" y1="220" x2="570" y2="220" stroke="#E2E8F0" stroke-width="2" />
+          </svg>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#DC2626"></span>Bugs</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#3B82F6"></span>Vulnerabilities</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <h2 class="section-title">Module Metrics</h2>
+      <div class="table-wrapper">
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>Module Name</th>
+              <th>Bugs</th>
+              <th>Code Smells</th>
+              <th>Coverage %</th>
+              <th>Duplication %</th>
+              <th>Complexity</th>
+              <th>Lines of Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (moduleMetrics().length === 0) {
+              <tr><td colspan="7" class="empty-state"><div class="empty-state-content"><i class="fas fa-inbox"></i><p>No module data available</p></div></td></tr>
+            } @else {
+              @for (module of pagedModules(); track module.name) {
+                <tr>
+                  <td><strong>{{ module.name }}</strong></td>
+                  <td>{{ module.bugs }}</td>
+                  <td>{{ module.codeSmells }}</td>
+                  <td>{{ module.coverage }}%</td>
+                  <td>{{ module.duplication }}%</td>
+                  <td>{{ module.complexity }}</td>
+                  <td>{{ module.loc }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (moduleTotalPages() > 1) {
+        <div class="pagination-bar">
+          <span class="page-info">Showing {{ modulePageStart() }}–{{ modulePageEnd() }} of {{ moduleMetrics().length }} modules</span>
+          <div class="page-controls">
+            <button class="page-btn" [disabled]="modulePage() === 1" (click)="goToModulePage(modulePage() - 1)">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            @for (item of modulePageItems(); track $index) {
+              @if (item === null) {
+                <span class="page-ellipsis">…</span>
+              } @else {
+                <button class="page-btn" [class.active]="item === modulePage()" (click)="goToModulePage(item)">{{ item }}</button>
+              }
+            }
+            <button class="page-btn" [disabled]="modulePage() === moduleTotalPages()" (click)="goToModulePage(modulePage() + 1)">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
 </div>

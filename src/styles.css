@@ -224,6 +224,23 @@ code {
   body {
     font-size: 13px;
   }
+
+  .no-project-banner {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .pagination-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-controls {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
 }
 
 /* ── Loader (app-loader) ───────────────────────────────────── */

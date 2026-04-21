@@ -1,5 +1,5 @@
 .metrics-page {
-  padding: 24px 32px;
+  padding: 24px;
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -100,6 +100,10 @@
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
+.table-wrapper {
+  overflow-x: auto;
+}
+
 .metrics-table {
   width: 100%;
   border-collapse: collapse;
@@ -162,4 +166,46 @@
   height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .metrics-page {
+    padding: 16px;
+  }
+
+  .metrics-kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .chart-card,
+  .table-card {
+    padding: 16px;
+  }
+
+  .metric-kpi-card .kpi-value {
+    font-size: 28px;
+  }
+
+  .chart-legend {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  .metrics-table th,
+  .metrics-table td {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-page {
+    padding: 12px;
+  }
+
+  .chart-placeholder {
+    padding: 8px 0;
+  }
 }

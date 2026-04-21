@@ -2,6 +2,8 @@
   padding: 24px;
   background: #f8fafc;
   min-height: calc(100vh - 64px);
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
 .ai-card {
@@ -160,10 +162,28 @@
 }
 
 @media (max-width: 900px) {
+  .ai-page {
+    padding: 16px;
+  }
+
   .ai-overview-grid,
   .ai-list-grid,
   .risk-driver-grid {
     grid-template-columns: 1fr;
   }
+
+  .ai-card {
+    padding: 16px;
+  }
+
+  .scans-table th,
+  .scans-table td {
+    white-space: nowrap;
+  }
 }
 
+@media (max-width: 480px) {
+  .ai-page {
+    padding: 12px;
+  }
+}

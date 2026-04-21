@@ -1,101 +1,180 @@
 <div class="projects-page">
-  @if (isLoading()) {
-    <app-loader message="Loading projects..." />
-  } @else if (error()) {
+  @if (error()) {
     <app-error-state [message]="error()!" (retry)="loadProjects()" />
   } @else {
+    <div class="projects-panel">
+      <div class="panel-header">
+        <h2 class="section-title">Projects</h2>
+        <button class="btn btn-secondary compact-btn" (click)="syncAllProjects()" [disabled]="isSyncingAll()">
+          @if (isSyncingAll()) { Syncing... } @else { Sync All }
+        </button>
+      </div>
 
-  <!-- Projects Section -->
-  <div class="projects-panel">
-    <h2 class="section-title">Projects</h2>
-    <div class="projects-list">
-      @if (projects().length === 0) {
+      <div class="projects-filters">
+        <div class="search-input-wrap">
+          <i class="fas fa-search"></i>
+          <input
+            class="search-input"
+            type="text"
+            placeholder="Search projects by name or key"
+            [value]="searchTerm()"
+            (input)="setSearch($event)"
+          />
+        </div>
+        <select class="filter-select" [value]="projectRecencyFilter()" (change)="setProjectRecency($event)">
+          <option value="all">All scans</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+      </div>
+
+      @if (isLoading()) {
+        <div class="skeleton-list">
+          @for (i of [1,2,3,4,5,6]; track i) {
+            <div class="project-skeleton"></div>
+          }
+        </div>
+      } @else if (filteredProjects().length === 0) {
         <div class="empty-state-box">
           <i class="fas fa-folder-open"></i>
-          <p>No projects available</p>
-          <small>Add a new project to get started</small>
+          <p>No matching projects found</p>
+          <small>Try changing filters or syncing your projects</small>
+          <button class="btn btn-primary compact-btn" (click)="syncAllProjects()" [disabled]="isSyncingAll()">Sync Projects</button>
         </div>
       } @else {
-        @for (project of projects(); track project.projectId) {
-          <div class="project-card"
-               [class.active]="selectedProject()?.projectId === project.projectId"
-               (click)="selectProject(project)">
-            <div class="project-icon">
-              <i class="fas fa-shield-alt"></i>
+        <div class="projects-list">
+          @for (project of filteredProjects(); track project.projectId) {
+            <div class="project-card"
+                 [class.active]="selectedProject()?.projectId === project.projectId"
+                 (click)="selectProject(project)">
+              <div class="project-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div class="project-info">
+                <h3 class="project-name">{{ project.name }}</h3>
+                <p class="project-url">{{ project.organization ?? project.projectKey }}</p>
+                <p class="project-scan">Last Scan: {{ formatDate(project.lastScanDate) }}</p>
+              </div>
+              <i class="fas fa-chevron-right arrow-icon"></i>
             </div>
-            <div class="project-info">
-              <h3 class="project-name">{{ project.name }}</h3>
-              <p class="project-url">{{ project.organization ?? project.projectKey }}</p>
-              <p class="project-scan">Last Scan: {{ project.lastScanDate ?? 'N/A' }}</p>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="scan-history-panel">
+      <div class="history-toolbar">
+        <div class="history-toolbar-left">
+          <h2 class="section-title">Scan History</h2>
+          <p class="history-selected-name">{{ selectedProject()?.name ?? 'No project selected' }}</p>
+        </div>
+        <div class="history-toolbar-right">
+          <a class="btn btn-secondary compact-btn" routerLink="/ai-insights">AI Insights</a>
+          <button class="btn btn-primary compact-btn" [disabled]="!selectedProject() || isSyncingProject()" (click)="syncSelectedProject()">
+            @if (isSyncingProject()) { Syncing... } @else { Sync Project }
+          </button>
+          <button class="btn btn-secondary icon-only" (click)="toggleHistoryCollapse()" aria-label="Toggle scan history">
+            <i class="fas" [class.fa-chevron-down]="isHistoryCollapsed()" [class.fa-chevron-up]="!isHistoryCollapsed()"></i>
+          </button>
+        </div>
+      </div>
+
+      @if (syncMessage()) {
+        <div class="sync-message">
+          <i class="fas fa-info-circle"></i>
+          {{ syncMessage() }}
+        </div>
+      }
+
+      @if (isHistoryCollapsed()) {
+        <button class="expand-history-btn" (click)="toggleHistoryCollapse()">Show scan history</button>
+      } @else {
+        <div class="history-card">
+          <div class="history-filters">
+            <select class="filter-select" [value]="historyGateFilter()" (change)="setHistoryGate($event)">
+              <option value="all">All statuses</option>
+              <option value="PASS">PASS only</option>
+              <option value="FAIL">FAIL only</option>
+            </select>
+            <select class="filter-select" [value]="historyRecencyFilter()" (change)="setHistoryRecency($event)">
+              <option value="all">All dates</option>
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
+            </select>
           </div>
-        }
-      }
-    </div>
-  </div>
 
-  <!-- Scan History Section -->
-  <div class="scan-history-panel">
-    <h2 class="section-title">Scan History</h2>
-    <div class="history-card">
-      <h3 class="history-label">
-        @if (selectedProject()) {
-          {{ selectedProject()!.name }}
-        } @else {
-          Scan History
-        }
-      </h3>
-
-      @if (historyLoading()) {
-        <app-loader message="Loading scan history..." />
-      } @else if (historyError()) {
-        <app-error-state [message]="historyError()!" (retry)="loadScanHistory(selectedProject()!.projectId)" />
-      } @else {
-        <div class="table-wrapper">
-          <table class="history-table">
-            <thead>
-              <tr>
-                <th>Scan Date</th>
-                <th>Branch</th>
-                <th>Commit Hash</th>
-                <th>Gate Status</th>
-                <th>View Analysis</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (scanHistory().length === 0) {
-                <tr>
-                  <td colspan="5" class="empty-state">
-                    <div class="empty-state-content">
-                      <i class="fas fa-history"></i>
-                      <p>No scan history available</p>
-                    </div>
-                  </td>
-                </tr>
-              } @else {
-                @for (scan of scanHistory(); track scan.scanDate) {
-                  <tr>
-                    <td>{{ scan.scanDate }}</td>
-                    <td>{{ scan.branch ?? 'N/A' }}</td>
-                    <td><code>{{ (scan.commitId ?? 'N/A').substring(0, 8) }}</code></td>
-                    <td>
-                      <span class="badge"
-                        [class.badge-success]="scan.qualityGateStatus === 'PASS'"
-                        [class.badge-danger]="scan.qualityGateStatus === 'FAIL'">
-                        {{ scan.qualityGateStatus ?? 'N/A' }}
-                      </span>
-                    </td>
-                    <td><button class="btn-link">View Analysis</button></td>
-                  </tr>
-                }
+          @if (!selectedProject()) {
+            <div class="empty-state-box compact-empty">
+              <i class="fas fa-arrow-left"></i>
+              <p>Select a project to view scan history</p>
+            </div>
+          } @else if (historyLoading()) {
+            <div class="skeleton-table">
+              @for (row of [1,2,3,4,5,6,7,8]; track row) {
+                <div class="history-row-skeleton"></div>
               }
-            </tbody>
-          </table>
+            </div>
+          } @else if (historyError()) {
+            <app-error-state [message]="historyError()!" (retry)="loadScanHistory(selectedProject()!.projectId)" />
+          } @else if (filteredScanHistory().length === 0) {
+            <div class="empty-state-box compact-empty">
+              <i class="fas fa-history"></i>
+              <p>No scan history matches your filters</p>
+              <small>Run sync to pull the latest scans for this project</small>
+              <button class="btn btn-primary compact-btn" (click)="syncSelectedProject()" [disabled]="isSyncingProject()">Run Sync</button>
+            </div>
+          } @else {
+            <div class="table-wrapper desktop-history">
+              <table class="history-table">
+                <thead>
+                  <tr>
+                    <th>Scan Date</th>
+                    <th>Branch</th>
+                    <th>Commit Hash</th>
+                    <th>Gate Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (scan of filteredScanHistory(); track scan.scanDate + (scan.commitId ?? '')) {
+                    <tr>
+                      <td>{{ formatDate(scan.scanDate) }}</td>
+                      <td>{{ scan.branch ?? 'N/A' }}</td>
+                      <td><code>{{ (scan.commitId ?? 'N/A').substring(0, 8) }}</code></td>
+                      <td>
+                        <span class="badge"
+                          [class.badge-success]="scan.qualityGateStatus === 'PASS'"
+                          [class.badge-danger]="scan.qualityGateStatus === 'FAIL'">
+                          {{ scan.qualityGateStatus ?? 'N/A' }}
+                        </span>
+                      </td>
+                      <td><button class="btn-link">View Analysis</button></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="mobile-history-cards">
+              @for (scan of filteredScanHistory(); track scan.scanDate + (scan.commitId ?? '')) {
+                <div class="scan-card">
+                  <div class="scan-card-head">
+                    <strong>{{ formatDate(scan.scanDate) }}</strong>
+                    <span class="badge"
+                      [class.badge-success]="scan.qualityGateStatus === 'PASS'"
+                      [class.badge-danger]="scan.qualityGateStatus === 'FAIL'">
+                      {{ scan.qualityGateStatus ?? 'N/A' }}
+                    </span>
+                  </div>
+                  <div class="scan-meta"><span>Branch</span><span>{{ scan.branch ?? 'N/A' }}</span></div>
+                  <div class="scan-meta"><span>Commit</span><code>{{ (scan.commitId ?? 'N/A').substring(0, 8) }}</code></div>
+                  <button class="btn-link">View Analysis</button>
+                </div>
+              }
+            </div>
+          }
         </div>
       }
     </div>
-  </div>
-
-  } <!-- end @else -->
+  }
 </div>

@@ -90,32 +90,34 @@
   <!-- Gate History -->
   <div class="gate-history-card">
     <h2 class="section-title">Gate History</h2>
-    <table class="gate-history-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Branch</th>
-          <th>Status</th>
-          <th>Failed Rule</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (history of pagedHistory(); track history.date) {
+    <div class="table-wrapper">
+      <table class="gate-history-table">
+        <thead>
           <tr>
-            <td>{{ history.date }}</td>
-            <td>{{ history.branch }}</td>
-            <td>
-              <span class="badge" 
-                [class.badge-success]="history.status === 'PASS'"
-                [class.badge-danger]="history.status === 'FAIL'">
-                {{ history.status }}
-              </span>
-            </td>
-            <td>{{ history.failedRule || 'All conditions passed' }}</td>
+            <th>Date</th>
+            <th>Branch</th>
+            <th>Status</th>
+            <th>Failed Rule</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (history of pagedHistory(); track history.date) {
+            <tr>
+              <td>{{ history.date }}</td>
+              <td>{{ history.branch }}</td>
+              <td>
+                <span class="badge" 
+                  [class.badge-success]="history.status === 'PASS'"
+                  [class.badge-danger]="history.status === 'FAIL'">
+                  {{ history.status }}
+                </span>
+              </td>
+              <td>{{ history.failedRule || 'All conditions passed' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
     @if (historyTotalPages() > 1) {
       <div class="pagination-bar">

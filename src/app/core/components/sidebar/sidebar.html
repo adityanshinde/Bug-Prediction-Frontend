@@ -6,11 +6,11 @@
       <path d="M24 22L27 25L24 28L21 25L24 22Z" fill="#93C5FD"/>
     </svg>
   </div>
-  
-  <nav class="sidebar-nav">
+
+  <nav class="sidebar-nav desktop-nav">
     @for (item of menuItems; track item.route) {
-      <a 
-        [routerLink]="item.route" 
+      <a
+        [routerLink]="item.route"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
         class="nav-item">
@@ -19,4 +19,45 @@
       </a>
     }
   </nav>
+
+  <nav class="sidebar-nav mobile-nav">
+    @for (item of mobilePrimaryItems; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
+        class="nav-item">
+        <span class="nav-icon" [innerHTML]="item.icon"></span>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+
+    <button class="nav-item nav-more-btn" [class.active]="isMoreOpen() || isOverflowActive()" (click)="toggleMoreMenu()">
+      <span class="nav-icon"><i class="fas fa-ellipsis-h"></i></span>
+      <span class="nav-label">More</span>
+    </button>
+  </nav>
+
+  @if (isMoreOpen()) {
+    <div class="mobile-more-sheet">
+      <div class="more-sheet-header">
+        <span>More</span>
+        <button class="more-close-btn" (click)="closeMoreMenu()" aria-label="Close more menu">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="more-sheet-links">
+        @for (item of mobileOverflowItems; track item.route) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            (click)="closeMoreMenu()"
+            class="more-link">
+            <span class="nav-icon" [innerHTML]="item.icon"></span>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </div>
+    </div>
+  }
 </aside>

@@ -1,5 +1,5 @@
 .qa-analysis-page {
-  padding: 24px 32px;
+  padding: 24px;
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -182,6 +182,10 @@ textarea.form-control {
   background: var(--hover-bg);
 }
 
+.table-wrapper {
+  overflow-x: auto;
+}
+
 .check-icon {
   color: var(--success-green);
   font-size: 18px;
@@ -201,5 +205,37 @@ textarea.form-control {
   
   .qa-summary-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .qa-analysis-page {
+    padding: 16px;
+  }
+
+  .qa-form-card,
+  .qa-results {
+    padding: 16px;
+  }
+
+  .qa-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .qa-analysis-page {
+    padding: 12px;
+  }
+
+  .qa-form {
+    gap: 14px;
   }
 }
