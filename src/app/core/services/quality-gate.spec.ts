@@ -1,13 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 
-import { QualityGate } from './quality-gate';
+import { QualityGateService } from './quality-gate';
 
-describe('QualityGate', () => {
-  let service: QualityGate;
+describe('QualityGateService', () => {
+  let service: QualityGateService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(QualityGate);
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient()]
+    });
+    service = TestBed.inject(QualityGateService);
   });
 
   it('should be created', () => {

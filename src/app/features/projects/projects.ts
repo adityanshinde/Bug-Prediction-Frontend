@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ErrorState } from '../../shared/components/error-state/error-state';
 import { ProjectService } from '../../core/services/project';
@@ -26,6 +26,8 @@ export class Projects implements OnInit {
   historyGateFilter = signal<'all' | 'PASS' | 'FAIL'>('all');
   historyRecencyFilter = signal<'all' | '7' | '30'>('all');
   isHistoryCollapsed = signal(false);
+  historyPage = signal(1);
+  readonly HISTORY_PAGE_SIZE = 20;
 
   projects = signal<ProjectListDto[]>([]);
   scanHistory = signal<ScanHistoryDto[]>([]);
@@ -51,6 +53,33 @@ export class Projects implements OnInit {
       return gateOk && recencyOk;
     });
   });
+
+  historyTotalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredScanHistory().length / this.HISTORY_PAGE_SIZE))
+  );
+
+  pagedScanHistory = computed<ScanHistoryDto[]>(() => {
+    const page = Math.min(this.historyPage(), this.historyTotalPages());
+    const start = (page - 1) * this.HISTORY_PAGE_SIZE;
+    return this.filteredScanHistory().slice(start, start + this.HISTORY_PAGE_SIZE);
+  });
+
+  historyPageStart = computed(() =>
+    this.filteredScanHistory().length === 0 ? 0 : ((Math.min(this.historyPage(), this.historyTotalPages()) - 1) * this.HISTORY_PAGE_SIZE) + 1
+  );
+
+  historyPageEnd = computed(() =>
+    Math.min(Math.min(this.historyPage(), this.historyTotalPages()) * this.HISTORY_PAGE_SIZE, this.filteredScanHistory().length)
+  );
+
+  constructor() {
+    effect(() => {
+      const total = this.historyTotalPages();
+      const current = this.historyPage();
+      if (current > total) this.historyPage.set(total);
+      if (current < 1) this.historyPage.set(1);
+    });
+  }
 
   ngOnInit(): void {
     this.loadProjects();
@@ -81,12 +110,14 @@ export class Projects implements OnInit {
   selectProject(project: ProjectListDto): void {
     this.projectService.setSelectedProject(project);
     this.isHistoryCollapsed.set(false);
+    this.historyPage.set(1);
     this.loadScanHistory(project.projectId);
   }
 
   loadScanHistory(projectId: number): void {
     this.historyLoading.set(true);
     this.historyError.set(null);
+    this.historyPage.set(1);
     this.projectService.getScanHistory(projectId).subscribe({
       next: (h) => {
         this.scanHistory.set(h);
@@ -112,15 +143,23 @@ export class Projects implements OnInit {
   setHistoryGate(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.historyGateFilter.set((target.value as 'all' | 'PASS' | 'FAIL') ?? 'all');
+    this.historyPage.set(1);
   }
 
   setHistoryRecency(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.historyRecencyFilter.set((target.value as 'all' | '7' | '30') ?? 'all');
+    this.historyPage.set(1);
   }
 
   toggleHistoryCollapse(): void {
     this.isHistoryCollapsed.update((v) => !v);
+  }
+
+  goToHistoryPage(page: number): void {
+    if (page >= 1 && page <= this.historyTotalPages()) {
+      this.historyPage.set(page);
+    }
   }
 
   syncAllProjects(): void {

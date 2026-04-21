@@ -174,7 +174,7 @@
   }
 
   .metrics-kpi-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     margin-bottom: 20px;
   }
@@ -207,5 +207,11 @@
 
   .chart-placeholder {
     padding: 8px 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .metrics-kpi-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,23 +1,27 @@
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { StatusBadge } from './status-badge';
 
+@Component({
+  standalone: true,
+  imports: [StatusBadge],
+  template: `<app-status-badge [status]="'PASS'" />`
+})
+class TestHostComponent {}
+
 describe('StatusBadge', () => {
-  let component: StatusBadge;
-  let fixture: ComponentFixture<StatusBadge>;
+  let fixture: ComponentFixture<TestHostComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StatusBadge]
-    })
-    .compileComponents();
+      imports: [TestHostComponent]
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(StatusBadge);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture = TestBed.createComponent(TestHostComponent);
+    fixture.detectChanges();
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });

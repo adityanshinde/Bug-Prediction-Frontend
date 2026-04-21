@@ -1,13 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 
-import { Qa } from './qa';
+import { QaService } from './qa';
 
-describe('Qa', () => {
-  let service: Qa;
+describe('QaService', () => {
+  let service: QaService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Qa);
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient()]
+    });
+    service = TestBed.inject(QaService);
   });
 
   it('should be created', () => {

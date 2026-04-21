@@ -267,7 +267,7 @@
   }
   
   .kpi-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
   
@@ -295,10 +295,21 @@
   .dashboard {
     padding: 12px;
   }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
   
   .chart-legend {
     flex-direction: column;
     gap: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
   }
 }
 
