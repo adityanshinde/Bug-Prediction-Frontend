@@ -1,0 +1,166 @@
+<div class="ai-page">
+  @if (noProjectSelected()) {
+    <div class="no-project-banner">
+      <i class="fas fa-info-circle"></i>
+      Please select a project from the <strong>Projects</strong> page first.
+    </div>
+  }
+
+  @if (isLoading()) {
+    <app-loader message="Loading AI insights..." />
+  } @else if (error()) {
+    <app-error-state [message]="error()!" (retry)="reload()" />
+  } @else if (aiInsights()) {
+    <div class="ai-card">
+      <h2 class="ai-title"><i class="fas fa-robot"></i> AI Insights</h2>
+
+      <div class="ai-insights-content">
+        @if (aiStructured()) {
+          <div class="ai-overview-grid">
+            <div class="ai-overview-card">
+              <div class="ai-label">Health Score</div>
+              <div class="ai-score">{{ aiInsights()!.score }}/100</div>
+            </div>
+            <div class="ai-overview-card">
+              <div class="ai-label">Confidence</div>
+              <div class="ai-confidence">{{ aiStructured()!.confidence || 'N/A' }}</div>
+            </div>
+          </div>
+
+          <div class="ai-section-card">
+            <h3 class="ai-section-title">Executive Summary</h3>
+            <p class="ai-paragraph">{{ aiStructured()!.executiveSummary }}</p>
+          </div>
+
+          <div class="ai-section-card">
+            <h3 class="ai-section-title">Risk Drivers</h3>
+            @if (aiStructured()!.riskDrivers.length === 0) {
+              <p class="ai-muted">No risk drivers provided.</p>
+            } @else {
+              <div class="risk-driver-grid">
+                @for (driver of aiStructured()!.riskDrivers; track driver.title) {
+                  <div class="risk-driver-item">
+                    <h4>{{ driver.title }}</h4>
+                    <p><strong>Evidence:</strong> {{ driver.evidence }}</p>
+                    <p><strong>Impact:</strong> {{ driver.impact }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="ai-section-card">
+            <h3 class="ai-section-title">Action Plan</h3>
+            @if (aiStructured()!.actionPlan.length === 0) {
+              <p class="ai-muted">No action plan provided.</p>
+            } @else {
+              <div class="table-wrapper">
+                <table class="scans-table">
+                  <thead>
+                    <tr>
+                      <th>Priority</th>
+                      <th>Action</th>
+                      <th>Owner</th>
+                      <th>Effort</th>
+                      <th>Expected Impact</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of aiStructured()!.actionPlan; track item.action) {
+                      <tr>
+                        <td>{{ item.priority }}</td>
+                        <td>{{ item.action }}</td>
+                        <td>{{ item.ownerType }}</td>
+                        <td>{{ item.effort }}</td>
+                        <td>{{ item.expectedImpact }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+
+          <div class="ai-list-grid">
+            <div class="ai-section-card">
+              <h3 class="ai-section-title">Quick Wins</h3>
+              <ul class="ai-list">
+                @for (item of aiStructured()!.quickWins; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
+            <div class="ai-section-card">
+              <h3 class="ai-section-title">Watch Items</h3>
+              <ul class="ai-list">
+                @for (item of aiStructured()!.watchItems; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
+          </div>
+
+          <div class="ai-section-card">
+            <h3 class="ai-section-title">Assumptions</h3>
+            <ul class="ai-list">
+              @for (item of aiStructured()!.assumptions; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          </div>
+        } @else {
+          <div class="ai-section-card">
+            <h3 class="ai-section-title">Insights</h3>
+            <ul class="ai-list">
+              @for (insight of aiLegacyInsights(); track insight) {
+                <li>{{ insight }}</li>
+              }
+            </ul>
+          </div>
+        }
+
+        <div class="ai-section-card">
+          <h3 class="ai-section-title">Risky Modules</h3>
+          @if (aiRiskyModules().length === 0) {
+            <p class="ai-muted">No risky modules provided.</p>
+          } @else {
+            <div class="table-wrapper">
+              <table class="scans-table">
+                <thead>
+                  <tr>
+                    <th>Module</th>
+                    <th>Path</th>
+                    <th>Bugs</th>
+                    <th>Vulnerabilities</th>
+                    <th>Code Smells</th>
+                    <th>Coverage</th>
+                    <th>Recommendation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (module of aiRiskyModules(); track module.path) {
+                    <tr>
+                      <td>{{ module.moduleName }}</td>
+                      <td>{{ module.path }}</td>
+                      <td>{{ module.bugs }}</td>
+                      <td>{{ module.vulnerabilities }}</td>
+                      <td>{{ module.codeSmells }}</td>
+                      <td>{{ module.coverage }}%</td>
+                      <td>{{ module.recommendation }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="ai-card">
+      <h2 class="ai-title"><i class="fas fa-robot"></i> AI Insights</h2>
+      <p class="ai-muted">AI-powered analysis and predictions for your project.</p>
+    </div>
+  }
+</div>
+

@@ -1,0 +1,169 @@
+.ai-page {
+  padding: 24px;
+  background: #f8fafc;
+  min-height: calc(100vh - 64px);
+}
+
+.ai-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid #d1d5db;
+}
+
+.ai-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-title i {
+  color: #2563eb;
+}
+
+.ai-insights-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ai-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.ai-overview-card {
+  background: #ffffff;
+  border: 1px solid #dbe3f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.ai-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #64748b;
+}
+
+.ai-score,
+.ai-confidence {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.ai-section-card {
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+}
+
+.ai-section-title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #2563eb;
+}
+
+.ai-paragraph {
+  margin: 0;
+  color: #374151;
+  line-height: 1.55;
+}
+
+.ai-list-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.ai-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #374151;
+}
+
+.ai-list li {
+  margin-bottom: 6px;
+}
+
+.ai-muted {
+  margin: 0;
+  color: #6b7280;
+}
+
+.risk-driver-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.risk-driver-item {
+  background: #ffffff;
+  border: 1px solid #dbe3f0;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.risk-driver-item h4 {
+  margin: 0 0 8px;
+  color: #1e3a8a;
+  font-size: 15px;
+}
+
+.risk-driver-item p {
+  margin: 4px 0;
+  color: #374151;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.scans-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.scans-table thead {
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.scans-table th {
+  text-align: left;
+  padding: 12px 16px;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.scans-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.no-project-banner {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 900px) {
+  .ai-overview-grid,
+  .ai-list-grid,
+  .risk-driver-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

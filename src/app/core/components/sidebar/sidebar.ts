@@ -29,6 +29,11 @@ export class Sidebar {
       icon: '<i class="fas fa-chart-line"></i>', 
       route: '/metrics' 
     },
+    {
+      label: 'AI Insights',
+      icon: '<i class="fas fa-robot"></i>',
+      route: '/ai-insights'
+    },
     { 
       label: 'QA Analysis', 
       icon: '<i class="fas fa-flask"></i>', 
